@@ -119,7 +119,6 @@ const node0 = graph.addNode("adder");
 const node1 = graph.addNode("adder");
 
 const edge0 = node0.connectIn(node1.getOutput("sum"), "x")
-```
 
 graph.removeEdge(edge0);
 
@@ -130,4 +129,5 @@ graph.onAddEdge(() => {
 graph.removeAddEdge(() => {
 
 })
+```
 
