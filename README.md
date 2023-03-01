@@ -95,7 +95,7 @@ render to HTML or canvas?
 - assemblies
 - execution model: pull with caching
 
-## scene graphs
+### scene graphs
 
 - execution: pull with caching
 - say I'm writing a three.js app, but I have a custom model with a lot of state that gets updated from some set of inputs
