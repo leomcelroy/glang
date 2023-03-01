@@ -113,7 +113,6 @@ graph editor
 
 */
 
-
 const graph = new Graph()
 const node0 = graph.addNode("adder");
 const node1 = graph.addNode("adder");
@@ -129,5 +128,21 @@ graph.onAddEdge(() => {
 graph.removeAddEdge(() => {
 
 })
+```
+
+graph schema
+
+```
+nodes = {
+	id: { 
+		...anything...
+	}
+}
+
+edges = {
+	"nodeId:port": "nodeId:port"
+}
+
+{ nodes, edges }
 ```
 
