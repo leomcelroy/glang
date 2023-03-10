@@ -32,6 +32,9 @@ render to HTML or canvas?
   - when any node is evaluated, we cache the result
   - when a node's data changes, we propagate a signal that invalidates cached results in the transitive closure of its outputs
   - can used cached values when executing a node
+- token passing
+  - tokens have data and are present or absent
+  - needs state on edges
 - long running computations
   - show progress bars within nodes, updated with info from an execution engine on a remote server
   - so from the UI's perspective there isn't a coherent execution model -- internal nodes may be updated without push or pull events
@@ -103,6 +106,10 @@ render to HTML or canvas?
 - each frame I'd check if the output is fresh, if not it gets re-evaluated and I update the state of my three.js stuff
 - here I might not ever need to visualize the graph
   - but I totally would if it came for free
+
+### ALA
+
+- token passing based logic
 
 ## Possible API
 
