@@ -133,6 +133,7 @@ const dropdown = (state) => {
 
   return html`
     <div class="menu-item dropdown-container">
+      <i class="fa-solid fa-bars" style="padding-right: 10px;"></i>
       add node
       <div class="dropdown-list node-toolbox">
         <input class="node-search" .value=${state.searchTerm} @input=${e => {
@@ -154,14 +155,26 @@ export function view(state) {
   return html`
     <div class="root">
       <div class="menu">
-        <div class="menu-item" @click=${() => { } }}>run</div>
-        <div class="menu-item" @click=${() => { console.log({ nodes: state.nodes, edges: state.edges }) }}>print graph</div>
+        <div class="menu-item" @click=${() => { } }}>
+          <i class="fa-solid fa-play" style="padding-right: 10px;"></i>
+          run
+        </div>
+        <div class="menu-item" @click=${() => { console.log({ nodes: state.nodes, edges: state.edges }) }}>
+          <i class="fa-solid fa-print" style="padding-right: 10px;"></i>
+          print graph
+        </div>
         <div class="menu-item" @click=${() => {
           state.selectedNodes.forEach(delete_node);
-        }}>delete</div>
-        <div class="menu-item-no-hover">selected: ${state.selectedNodes.length}</div>
+        }}>
+          <i class="fa-solid fa-trash" style="padding-right: 10px;"></i>
+          delete
+        </div>
         ${dropdown(state)}
-        <a class="menu-item" href="https://github.com/leomcelroy/glang" target="_blank">github</a>
+
+        <div class="menu-item-no-hover" style="position:absolute; right: 40px;">selected: ${state.selectedNodes.length}</div>
+        <a class="github-logo" href="https://github.com/leomcelroy/glang">
+          <i class="fa-brands fa-github" style="font-size:24px"></i>
+        </a>
       </div>
    
       <div class="dataflow">
