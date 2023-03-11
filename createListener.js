@@ -17,6 +17,10 @@ function matchesTrigger(e, selectorString) {
 
 // create on listener
 export function createListener(target) {
+  // may want to add strict param
+  // normal event triggers if el child of selector or matches
+  // with strict target has to match selector
+  
   return (eventName, selectorString, event) => {
     // focus doesn't work with this, focus doesn't bubble, need focusin
     target.addEventListener(eventName, (e) => {

@@ -133,7 +133,7 @@ const dropdown = (state) => {
 
   return html`
     <div class="menu-item dropdown-container">
-      nodes
+      add node
       <div class="dropdown-list node-toolbox">
         <input class="node-search" .value=${state.searchTerm} @input=${e => {
           state.searchTerm = e.target.value;

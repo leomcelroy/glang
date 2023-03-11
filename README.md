@@ -22,6 +22,8 @@ serialization of types
 
 render to HTML or canvas?
 
+it's like separating a text editor from the languge being written
+
 ## execution models
 
 - pull
