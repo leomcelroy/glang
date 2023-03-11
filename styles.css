@@ -204,7 +204,7 @@ html, body {
 }
 
 .dataflow {
-  background: antiquewhite;
+/*  background: antiquewhite;*/
   flex: 1;
   position: relative;
   overflow: hidden;
