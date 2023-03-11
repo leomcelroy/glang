@@ -163,6 +163,10 @@ export function view(state) {
         ${dropdown(state)}
         <a class="menu-item" href="https://github.com/leomcelroy/glang" target="_blank">github</a>
       </div>
+      
+      <canvas
+          id="background"
+          style=${`--offset-x: ${x}px;--offset-y: ${y}px;--scale: ${scale}`}></canvas>
 
       <div class="dataflow">
         <svg class="edges">
@@ -171,9 +175,7 @@ export function view(state) {
             ${drawTempEdge(state.tempEdge, state)}
           </g>
         </svg>
-        <canvas
-          id="background"
-          style=${`--offset-x: ${x}px;--offset-y: ${y}px;--scale: ${scale}`}></canvas>
+        
         <div class="nodes">
           <div class="transform-group">
             ${Object.entries(state.nodes).map(e => drawNode(e, state))}

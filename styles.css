@@ -110,7 +110,6 @@ html, body {
   left: 0px;
   top: 0px;
   position: absolute;
-  z-index: 5;
 }
 
 .edge {
