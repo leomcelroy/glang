@@ -165,7 +165,7 @@ export function view(state) {
       </div>
 
       <div class="dataflow">
-        <svg class="edges" style="z-index:5;">
+        <svg class="edges">
           <g>
             ${Object.values(state.edges).map(x => drawEdge(x, state))}
             ${drawTempEdge(state.tempEdge, state)}
