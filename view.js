@@ -147,6 +147,10 @@ const dropdown = (state) => {
 }
 
 export function view(state) {
+  const x = state.dataflow ? state.dataflow.x() : 0;
+  const y = state.dataflow ? state.dataflow.y() : 0;
+  const scale = state.dataflow ? state.dataflow.scale() : 1;
+
   return html`
     <div class="root">
       <div class="menu">
@@ -161,12 +165,15 @@ export function view(state) {
       </div>
 
       <div class="dataflow">
-        <svg class="edges">
+        <svg class="edges" style="z-index:5;">
           <g>
             ${Object.values(state.edges).map(x => drawEdge(x, state))}
             ${drawTempEdge(state.tempEdge, state)}
           </g>
         </svg>
+        <canvas
+          id="background"
+          style=${`--offset-x: ${x}px;--offset-y: ${y}px;--scale: ${scale}`}></canvas>
         <div class="nodes">
           <div class="transform-group">
             ${Object.entries(state.nodes).map(e => drawNode(e, state))}
