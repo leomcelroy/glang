@@ -58,22 +58,41 @@ html, body {
 }
 
 .dropdown-list {
-  /*visibility: hidden;*/
-  z-index: 10;
+  z-index: 11;
   background: purple;
   position: absolute;
   padding: 5px;
-  overflow: hidden; /* this is bad and horrible but it works for now lol */
-  top: 99%;
+  top: 100%;
   left: 0;
   box-sizing: border-box;
+  width: max-content;
+/*  opacity: 0%;*/
+/*  transition: opacity 0.2s, visibility .2s, background .2s;*/
+  visibility: hidden;
 }
 
-.dropdown-list > * {
-  width: 100%;
+.node-type {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.node-type:hover {
+  opacity: .8;
+  cursor: grab;
+}
+
+.node-search {
+  padding: 5px;
+  margin: 3px;
 }
 
 .dropdown-container:hover .dropdown-list {
+/*  opacity: 100%;*/
+  visibility: visible;
+}
+
+.visible {
   visibility: visible;
 }
 

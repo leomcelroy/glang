@@ -46,10 +46,10 @@ export function addSelectBox(listener, state) {
     // console.log(p, selectBox);
     let { start, end } = selectBox;
     return (
-      (p.x > start.x && p.x < end.x && p.y > start.y && p.y < end.y) ||
-      (p.x > start.x && p.x < end.x && p.y < start.y && p.y > end.y) ||
-      (p.x < start.x && p.x > end.x && p.y > start.y && p.y < end.y) ||
-      (p.x < start.x && p.x > end.x && p.y < start.y && p.y > end.y)
+      (p.data.x > start.x && p.data.x < end.x && p.data.y > start.y && p.data.y < end.y) ||
+      (p.data.x > start.x && p.data.x < end.x && p.data.y < start.y && p.data.y > end.y) ||
+      (p.data.x < start.x && p.data.x > end.x && p.data.y > start.y && p.data.y < end.y) ||
+      (p.data.x < start.x && p.data.x > end.x && p.data.y < start.y && p.data.y > end.y)
     );
   };
 

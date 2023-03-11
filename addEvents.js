@@ -1,6 +1,7 @@
 import { addPanZoom } from "./addPanZoom.js";
 import { addSelectBox } from "./addSelectBox.js";
 import { addDropUpload } from "./addDropUpload.js";
+import { addNodeAdding } from "./addNodeAdding.js";
 
 import { add_connection } from "./actions/add_connection.js";
 import { remove_connection } from "./actions/remove_connection.js";
@@ -218,4 +219,14 @@ export function addEvents(state) {
   addWireManipulation(listenBody, state);
   addSelectBox(listenBody, state);
   addDropUpload(listenBody, state);
+
+  addNodeAdding(body, state);
+
+  body.addEventListener("keydown", e => {
+    if (e.keyCode === 191) {
+      // const container = body.querySelector(".dropdown-container");
+      // global_state.openSearch = true;
+      e.preventDefault();
+    }
+  })
 }

@@ -127,28 +127,37 @@ const drawSelectBox = box => {
   `
 }
 
-const dropdown = () => html`
-  <div class="menu-item dropdown-container">
-    list menu
-    <div class="dropdown-list">
-      <div class="menu-item">option 1</div>
-      <div class="menu-item">option 2</div>
+const dropdown = (state) => {
+  const searchQuery = state.searchTerm.toLowerCase();
+  const filteredNodes = state.nodeTypes.filter(x => x.name.toLowerCase().includes(searchQuery));
+
+  return html`
+    <div class="menu-item dropdown-container">
+      nodes
+      <div class="dropdown-list node-toolbox">
+        <input class="node-search" .value=${state.searchTerm} @input=${e => {
+          state.searchTerm = e.target.value;
+        }}/>
+        ${filteredNodes.map((nodeType, i) => html`
+            <div class="menu-item node-type" data-type=${i}>${nodeType.name}</div>
+          `)}
+      </div>
     </div>
-  </div>
-`
+  ` 
+}
 
 export function view(state) {
   return html`
     <div class="root">
       <div class="menu">
-        
         <div class="menu-item" @click=${() => { } }}>run</div>
         <div class="menu-item" @click=${() => { console.log({ nodes: state.nodes, edges: state.edges }) }}>print graph</div>
         <div class="menu-item" @click=${() => {
           state.selectedNodes.forEach(delete_node);
         }}>delete</div>
         <div class="menu-item-no-hover">selected: ${state.selectedNodes.length}</div>
-        <a class="menu-item" href="https://github.com/leomcelroy/software-defined-machines-graphs" target="_blank">github</a>
+        ${dropdown(state)}
+        <a class="menu-item" href="https://github.com/leomcelroy/glang" target="_blank">github</a>
       </div>
 
       <div class="dataflow">

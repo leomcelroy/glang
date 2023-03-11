@@ -46,7 +46,12 @@ export const global_state = {
       data: {},
      },
   },
+  nodeTypes: [
+    { name: "number", inputs: ["x"], outputs: ["x"] },
+    { name: "add", inputs: ["x", "y"], outputs: ["sum"] },
+  ],
   selectedNodes: [],
   tempEdge: ["", [0 ,0]],
   dataflow: null,
+  searchTerm: ""
 }
