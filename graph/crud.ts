@@ -1,29 +1,6 @@
+import { GLangNode, GLangEdge, GLangGraph } from './types';
 import { v4 as uuidv4 } from 'uuid';
 
-//--------------------------------------------------------------------------------------------------
-type GLangNode<NodeData> = {
-    data: NodeData;
-
-    // these strings are GLangEdge ids
-    inputs: Array<string | null>
-    outputs: Array<Set<string>>
-};
-
-//--------------------------------------------------------------------------------------------------
-type GLangEdge<EdgeData> = {
-    data: EdgeData;
-
-    src: {node_id: string, idx: number};
-    dst: {node_id: string, idx: number};
-};
-
-//--------------------------------------------------------------------------------------------------
-type GLangGraph<NodeData, EdgeData> = {
-    nodes: Map<string, GLangNode<NodeData>>;
-    edges: Map<string, GLangEdge<EdgeData>>;
-};
-
-//--------------------------------------------------------------------------------------------------
 function createGraph<NodeData, EdgeData>(): GLangGraph<NodeData, EdgeData> {
     return {
         nodes: new Map<string, GLangNode<NodeData>>(),
@@ -31,13 +8,11 @@ function createGraph<NodeData, EdgeData>(): GLangGraph<NodeData, EdgeData> {
     };
 }
 
-//--------------------------------------------------------------------------------------------------
 function deleteGraph<NodeData, EdgeData>(graph: GLangGraph<NodeData, EdgeData>) {
     graph.nodes.clear();
     graph.edges.clear();
 }
 
-//--------------------------------------------------------------------------------------------------
 function getNode<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string
@@ -49,7 +24,6 @@ function getNode<NodeData, EdgeData>(
     return node;
 }
 
-//--------------------------------------------------------------------------------------------------
 function getEdge<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     edge_id: string
@@ -61,7 +35,6 @@ function getEdge<NodeData, EdgeData>(
     return edge;
 }
 
-//--------------------------------------------------------------------------------------------------
 function addNode<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     data: NodeData
@@ -79,7 +52,6 @@ function addNode<NodeData, EdgeData>(
     return node_id;
 }
 
-//--------------------------------------------------------------------------------------------------
 function removeNode<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string
@@ -102,7 +74,6 @@ function removeNode<NodeData, EdgeData>(
     graph.nodes.delete(node_id);
 }
 
-//--------------------------------------------------------------------------------------------------
 function addInput<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string
@@ -116,7 +87,6 @@ function addInput<NodeData, EdgeData>(
     return input_idx;
 }
 
-//--------------------------------------------------------------------------------------------------
 function removeInput<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string,
@@ -142,7 +112,6 @@ function removeInput<NodeData, EdgeData>(
     }
 }
 
-//--------------------------------------------------------------------------------------------------
 function addOutput<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string
@@ -156,7 +125,6 @@ function addOutput<NodeData, EdgeData>(
     return output_idx;
 }
 
-//--------------------------------------------------------------------------------------------------
 function removeOutput<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string,
@@ -181,7 +149,6 @@ function removeOutput<NodeData, EdgeData>(
     }
 }
 
-//--------------------------------------------------------------------------------------------------
 function addEdge<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     data: EdgeData,
@@ -216,7 +183,6 @@ function addEdge<NodeData, EdgeData>(
     return edge_id;
 }
 
-//--------------------------------------------------------------------------------------------------
 function removeEdge<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     edge_id: string
@@ -228,3 +194,18 @@ function removeEdge<NodeData, EdgeData>(
     dst_node.inputs[edge.dst.idx] = null;
     graph.edges.delete(edge_id);
 }
+
+export {
+    createGraph,
+    deleteGraph,
+    getNode,
+    getEdge,
+    addNode,
+    removeNode,
+    addInput,
+    removeInput,
+    addOutput,
+    removeOutput,
+    addEdge,
+    removeEdge,
+};
