@@ -37,7 +37,9 @@ function getEdge<NodeData, EdgeData>(
 
 function addNode<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
-    data: NodeData
+    data: NodeData,
+    n_inputs: number = 0,
+    n_outputs: number = 0,
 ): string {
     const node_id = uuidv4();
     if (graph.nodes.has(node_id)) {
@@ -45,8 +47,8 @@ function addNode<NodeData, EdgeData>(
     }
     const node = {
         data: data,
-        inputs: [],
-        outputs: [],
+        inputs: Array(n_inputs).fill(null),
+        outputs: Array(n_outputs).fill(new Set<string>()),
     };
     graph.nodes.set(node_id, node);
     return node_id;
