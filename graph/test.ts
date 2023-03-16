@@ -1,6 +1,11 @@
 import { createGraph, addNode, addEdge } from "./crud";
 import { traverse_forward_breadth_first, traverse_backward_breadth_first } from "./traversal";
+import { makeArithmeticGraph, ArithmeticOperation } from "./examples/arithmetic";
 
+//--------------------------------------------------------------------------------------------------
+// Testing construction and traversal of a simple graph.
+
+/*
 type NodeData = {
     value: number;
 };
@@ -31,3 +36,18 @@ traverse_backward_breadth_first(graph, node_4, (graph, node_id, node) => {
 });
 
 console.log(graph);
+*/
+
+
+//--------------------------------------------------------------------------------------------------
+// Testing construction of an arithmetic graph.
+
+const graph = makeArithmeticGraph();
+const input_1 = graph.addNode(ArithmeticOperation.Input);
+const input_2 = graph.addNode(ArithmeticOperation.Input);
+const add = graph.addNode(ArithmeticOperation.Add);
+graph.addEdge(input_1, add, 0);
+graph.addEdge(input_2, add, 1);
+graph.changeInputValue(input_1, 2);
+graph.changeInputValue(input_2, 2);
+console.log(`2 + 2 = ${graph.getNodeValue(add)}`);
