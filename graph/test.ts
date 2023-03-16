@@ -1,5 +1,5 @@
 import { createGraph, addNode, addEdge } from "./crud";
-import { traverse_forward_breadth_first } from "./traversal";
+import { traverse_forward_breadth_first, traverse_backward_breadth_first } from "./traversal";
 
 type NodeData = {
     value: number;
@@ -20,7 +20,13 @@ const edge_2 = addEdge(graph, {}, node_2, 0, node_3, 1);
 const edge_3 = addEdge(graph, {}, node_3, 0, node_4, 0);
 const edge_4 = addEdge(graph, {}, node_1, 0, node_5, 0);
 
+console.log("forward")
 traverse_forward_breadth_first(graph, node_1, (graph, node_id, node) => {
+    console.log(node_id, node.data.value);
+});
+
+console.log("backward")
+traverse_backward_breadth_first(graph, node_4, (graph, node_id, node) => {
     console.log(node_id, node.data.value);
 });
 
