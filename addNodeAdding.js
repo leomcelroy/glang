@@ -29,7 +29,7 @@ export function addNodeAdding(el, state) {
     const node = JSON.parse(JSON.stringify(state.nodeTypes[typeToAdd]));
 
     // TODO: get default values from types
-    state.nodes[id] = {
+    state.graph.nodes[id] = {
       ...node,
       data: {
         x,

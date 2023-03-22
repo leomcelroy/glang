@@ -59,15 +59,15 @@ function addWireManipulation(listen, state) {
     const [ node, _inOut, port ] = e.target.dataset.id.split(":");
 
     // check if input is destination
-    for (const key in state.edges) {
-      const edge = state.edges[key];
+    for (const key in state.graph.edges) {
+      const edge = state.graph.edges[key];
       if (edge.dst.node === node && Number(port) === edge.dst.port) {
         currentIndex = key;
       }
     }
 
     if (currentIndex !== "") {
-      const src = state.edges[currentIndex].src
+      const src = state.graph.edges[currentIndex].src
       from = `${src.node}:out:${src.port}`;
     }
   })
@@ -106,8 +106,8 @@ function addWireManipulation(listen, state) {
       const [ node, _inOut, port ] = to.split(":");
 
       // check if input is destination
-      for (const key in state.edges) {
-        const edge = state.edges[key];
+      for (const key in state.graph.edges) {
+        const edge = state.graph.edges[key];
         if (edge.dst.node === node && Number(port) === edge.dst.port) {
           currentIndex = key;
         }

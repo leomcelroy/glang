@@ -129,7 +129,8 @@ const drawSelectBox = box => {
 
 const dropdown = (state) => {
   const searchQuery = state.searchTerm.toLowerCase();
-  const filteredNodes = state.nodeTypes.filter(x => x.name.toLowerCase().includes(searchQuery));
+  const nts = Object.entries(state.nodeTypes);
+  const filteredNodes = nts.filter(( [ key, value] ) => value.name.toLowerCase().includes(searchQuery));
 
   return html`
     <div class="menu-item dropdown-container">
@@ -139,8 +140,8 @@ const dropdown = (state) => {
         <input class="node-search" .value=${state.searchTerm} @input=${e => {
           state.searchTerm = e.target.value;
         }}/>
-        ${filteredNodes.map((nodeType, i) => html`
-            <div class="menu-item node-type" data-type=${i}>${nodeType.name}</div>
+        ${filteredNodes.map(([ key, value ]) => html`
+            <div class="menu-item node-type" data-type=${key}>${value.name}</div>
           `)}
       </div>
     </div>
@@ -159,7 +160,7 @@ export function view(state) {
           <i class="fa-solid fa-play" style="padding-right: 10px;"></i>
           run
         </div>
-        <div class="menu-item" @click=${() => { console.log({ nodes: state.nodes, edges: state.edges }) }}>
+        <div class="menu-item" @click=${() => { console.log(state.graph) }}>
           <i class="fa-solid fa-print" style="padding-right: 10px;"></i>
           print graph
         </div>
@@ -185,14 +186,14 @@ export function view(state) {
 
         <svg class="edges">
           <g>
-            ${Object.values(state.edges).map(x => drawEdge(x, state))}
+            ${Object.values(state.graph.edges).map(x => drawEdge(x, state))}
             ${drawTempEdge(state.tempEdge, state)}
           </g>
         </svg>
         
         <div class="nodes">
           <div class="transform-group">
-            ${Object.entries(state.nodes).map(e => drawNode(e, state))}
+            ${Object.entries(state.graph.nodes).map(e => drawNode(e, state))}
             ${drawSelectBox(state.selectBox)}
           </div>
         </div>
