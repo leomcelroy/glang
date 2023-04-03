@@ -33,11 +33,11 @@ const drawNode = (item, state) => { // TODO: make this a keyed-render
       data-id=${k}
       style=${`left: ${node.data.x}px; top: ${node.data.y}px;`}>
       <div class="node-title">
-        <div class="node-name">${node.name}</div>
+        <div class="node-name">${node.type}</div>
       </div>
       ${node.inputs.map((x, i) => drawNodeInput(k, i, x))}
       ${node.outputs.map((x, i) => drawNodeOutput(k, i, x))}
-      <div class="node-view"></div>
+      <div class="node-view" id=${k}></div>
     </div>
   `
 }
@@ -130,7 +130,7 @@ const drawSelectBox = box => {
 const dropdown = (state) => {
   const searchQuery = state.searchTerm.toLowerCase();
   const nts = Object.entries(state.nodeTypes);
-  const filteredNodes = nts.filter(( [ key, value] ) => value.name.toLowerCase().includes(searchQuery));
+  const filteredNodes = nts.filter(( [ key, value] ) => key.toLowerCase().includes(searchQuery));
 
   return html`
     <div class="menu-item dropdown-container">
@@ -141,7 +141,7 @@ const dropdown = (state) => {
           state.searchTerm = e.target.value;
         }}/>
         ${filteredNodes.map(([ key, value ]) => html`
-            <div class="menu-item node-type" data-type=${key}>${value.name}</div>
+            <div class="menu-item node-type" data-type=${key}>${key}</div>
           `)}
       </div>
     </div>

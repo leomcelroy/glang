@@ -3,7 +3,7 @@ export const global_state = {
   graph: {
     nodes: {
       "fds": { 
-        name:"number", 
+        type: "number", 
         inputs: ["x"],
         outputs: ["x"],
         data: {
@@ -12,7 +12,7 @@ export const global_state = {
         },
       },
       "fsa": { 
-        name:"number", 
+        type: "number", 
         inputs: ["x"],
         outputs: ["x"],
         data: {
@@ -21,7 +21,7 @@ export const global_state = {
         },
       },
       "dsf": { 
-        name:"add", 
+        type: "add", 
         inputs: ["x", "y"],
         outputs: ["sum"],
         data: {
@@ -49,8 +49,8 @@ export const global_state = {
     }
   },
   nodeTypes: {
-    "number": { name: "number", inputs: ["x"], outputs: ["x"] },
-    "adder": { name: "add", inputs: ["x", "y"], outputs: ["sum"] },
+    "number": { inputs: ["x"], outputs: ["x"] },
+    "add": { inputs: ["x", "y"], outputs: ["sum"] },
   },
   selectedNodes: [],
   tempEdge: ["", [0 ,0]],

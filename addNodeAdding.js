@@ -31,6 +31,7 @@ export function addNodeAdding(el, state) {
     // TODO: get default values from types
     state.graph.nodes[id] = {
       ...node,
+      type: typeToAdd,
       data: {
         x,
         y

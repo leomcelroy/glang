@@ -58,7 +58,7 @@ export function addSelectBox(listener, state) {
   	document.body.classList.remove("no-select");
     if (start && end) {
       // select
-      Object.entries(state.nodes).forEach(([k, n]) => {
+      Object.entries(state.graph.nodes).forEach(([k, n]) => {
         if (contains(n, { 
           start: { x: start[0], y: start[1] },
           end: { x: end[0], y: end[1] }
