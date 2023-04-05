@@ -46,10 +46,10 @@ export function addSelectBox(listener, state) {
     // console.log(p, selectBox);
     let { start, end } = selectBox;
     return (
-      (p.data.x > start.x && p.data.x < end.x && p.data.y > start.y && p.data.y < end.y) ||
-      (p.data.x > start.x && p.data.x < end.x && p.data.y < start.y && p.data.y > end.y) ||
-      (p.data.x < start.x && p.data.x > end.x && p.data.y > start.y && p.data.y < end.y) ||
-      (p.data.x < start.x && p.data.x > end.x && p.data.y < start.y && p.data.y > end.y)
+      (p.x > start.x && p.x < end.x && p.y > start.y && p.y < end.y) ||
+      (p.x > start.x && p.x < end.x && p.y < start.y && p.y > end.y) ||
+      (p.x < start.x && p.x > end.x && p.y > start.y && p.y < end.y) ||
+      (p.x < start.x && p.x > end.x && p.y < start.y && p.y > end.y)
     );
   };
 
@@ -58,7 +58,7 @@ export function addSelectBox(listener, state) {
   	document.body.classList.remove("no-select");
     if (start && end) {
       // select
-      Object.entries(state.graph.nodes).forEach(([k, n]) => {
+      Object.entries(state.graphUIData).forEach(([k, n]) => {
         if (contains(n, { 
           start: { x: start[0], y: start[1] },
           end: { x: end[0], y: end[1] }

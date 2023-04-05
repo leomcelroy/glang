@@ -57,19 +57,19 @@ function addWireManipulation(listen, state) {
   listen("mousedown", ".node-input-circle", e => {
     // if connected clickedKey is current input
     const [ node, _inOut, port ] = e.target.dataset.id.split(":");
-
     // check if input is destination
-    for (const key in state.graph.edges) {
-      const edge = state.graph.edges[key];
-      if (edge.dst.node === node && Number(port) === edge.dst.port) {
+    for (const key of state.graph.getGraph().edges.keys()) {
+      const edge = state.graph.getEdge(key);
+      if (edge.dst.node_id === node && Number(port) === edge.dst.idx) {
         currentIndex = key;
       }
     }
 
     if (currentIndex !== "") {
-      const src = state.graph.edges[currentIndex].src
-      from = `${src.node}:out:${src.port}`;
+      const src = state.graph.getEdge(currentIndex).src;
+      from = `${src.node_id}:out:${src.idx}`;
     }
+
   })
 
   listen("mousedown", ".node-output-circle", e => {
@@ -106,9 +106,9 @@ function addWireManipulation(listen, state) {
       const [ node, _inOut, port ] = to.split(":");
 
       // check if input is destination
-      for (const key in state.graph.edges) {
-        const edge = state.graph.edges[key];
-        if (edge.dst.node === node && Number(port) === edge.dst.port) {
+      for (const key in state.graph.getGraph().edges) {
+        const edge = state.graph.getGraph().edges[key];
+        if (edge.dst.node_id === node && Number(port) === edge.dst.port) {
           currentIndex = key;
         }
       }

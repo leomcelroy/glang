@@ -25,18 +25,21 @@ const drawNodeOutput = (k, index, name) => html`
 const drawNode = (item, state) => { // TODO: make this a keyed-render
   const [ k, node ] = item;
 
+  // Terrible
+  const nodeType = state.graph.getNodeTypes()[node.data.op];
+
   const selected = state.selectedNodes.includes(k);
 
   return html.for(node, k)`
     <div
       class=${["node", selected ? "selected-node" : ""].join(" ")}
       data-id=${k}
-      style=${`left: ${node.data.x}px; top: ${node.data.y}px;`}>
+      style=${`left: ${state.graphUIData[k].x}px; top: ${state.graphUIData[k].y}px;`}>
       <div class="node-title">
-        <div class="node-name">${node.type}</div>
+        <div class="node-name">${nodeType}</div>
       </div>
-      ${node.inputs.map((x, i) => drawNodeInput(k, i, x))}
-      ${node.outputs.map((x, i) => drawNodeOutput(k, i, x))}
+      ${state.graph.getInputNames(nodeType).map((x, i) => drawNodeInput(k, i, x))}
+      ${state.graph.getOutputNames(nodeType).map((x, i) => drawNodeOutput(k, i, x))}
       <div class="node-view" id=${k}></div>
     </div>
   `
@@ -59,15 +62,17 @@ function getRelative(selector0, selector1) {
 
 function drawEdge(edge, state) { // there muse be a better way to do this
   const { nodes } = state;
-  const outNode = edge.src.node;
-  const inNode = edge.dst.node;
+  const outNode_id = edge.src.node_id;
+  const outNode_idx = edge.src.idx;
+  const inNode = edge.dst.node_id;
+  const inNode_idx = edge.dst.idx;
 
   if (!document.querySelector(".socket") || state.dataflow === null) return "";
 
-  const offset0 = getRelative(`[data-id="${edge.src.node}:out:${edge.src.port}"]`, `.dataflow`);
-  const offset1 = getRelative(`[data-id="${edge.dst.node}:in:${edge.dst.port}"]`, `.dataflow`);
-  const rect0 = document.querySelector(`[data-id="${edge.src.node}:out:${edge.src.port}"]`)?.getBoundingClientRect() || { top: 0, left: 0 };
-  const rect1 = document.querySelector(`[data-id="${edge.dst.node}:in:${edge.dst.port}"]`)?.getBoundingClientRect() || { top: 0, left: 0 };
+  const offset0 = getRelative(`[data-id="${outNode_id}:out:${outNode_idx}"]`, `.dataflow`);
+  const offset1 = getRelative(`[data-id="${inNode}:in:${inNode_idx}"]`, `.dataflow`);
+  const rect0 = document.querySelector(`[data-id="${outNode_id}:out:${outNode_idx}"]`)?.getBoundingClientRect() || { top: 0, left: 0 };
+  const rect1 = document.querySelector(`[data-id="${inNode}:in:${inNode_idx}"]`)?.getBoundingClientRect() || { top: 0, left: 0 };
 
   const x0 = offset0[0]+rect0.width/2;
   const y0 = offset0[1]+rect0.height/2;
@@ -129,8 +134,8 @@ const drawSelectBox = box => {
 
 const dropdown = (state) => {
   const searchQuery = state.searchTerm.toLowerCase();
-  const nts = Object.entries(state.nodeTypes);
-  const filteredNodes = nts.filter(( [ key, value] ) => key.toLowerCase().includes(searchQuery));
+  const nts = Object.entries(state.graph.getNodeTypes());
+  const filteredNodes = nts.filter(( [ key, value] ) => value.toLowerCase().includes(searchQuery));
 
   return html`
     <div class="menu-item dropdown-container">
@@ -160,7 +165,7 @@ export function view(state) {
           <i class="fa-solid fa-play" style="padding-right: 10px;"></i>
           run
         </div>
-        <div class="menu-item" @click=${() => { console.log(state.graph) }}>
+        <div class="menu-item" @click=${() => { console.log(state.graph.getGraph()) }}>
           <i class="fa-solid fa-print" style="padding-right: 10px;"></i>
           print graph
         </div>
@@ -186,14 +191,14 @@ export function view(state) {
 
         <svg class="edges">
           <g>
-            ${Object.values(state.graph.edges).map(x => drawEdge(x, state))}
+            ${Array.from(state.graph.getGraph().edges).map(x => drawEdge(x[1], state))}
             ${drawTempEdge(state.tempEdge, state)}
           </g>
         </svg>
         
         <div class="nodes">
           <div class="transform-group">
-            ${Object.entries(state.graph.nodes).map(e => drawNode(e, state))}
+            ${Array.from(state.graph.getGraph().nodes).map(e => drawNode(e, state))}
             ${drawSelectBox(state.selectBox)}
           </div>
         </div>

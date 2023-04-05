@@ -266,3 +266,22 @@ edges = {
 ### sigma
 
 - appears that nodes have sets of edges rather than lists of inputs and outputs
+
+
+### Evaling
+  - when it occurs
+  - evaluation model
+    - timers ?
+  - evaluation operation
+
+### Event System
+
+events triggers on graph
+- run
+- add
+  - node
+  - edge
+- delete
+  - node
+  - edge
+- set value ?

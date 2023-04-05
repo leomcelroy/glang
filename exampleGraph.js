@@ -80,6 +80,7 @@ eval(graph, triggers, fns) {
 
 eval(graph, triggers, [ nodeTypes, nodeFns, nodeViews ]);
 
+graph.evaluate(triggers);
 
 typecheck
 {

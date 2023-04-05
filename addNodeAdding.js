@@ -13,12 +13,17 @@ export function addNodeAdding(el, state) {
 
   let dragging = false;
   let id = "";
-  let typeToAdd = "";
 
   listen("mousedown", ".node-type", e => {
-    typeToAdd = e.target.dataset.type;
+    const typeToAdd = e.target.dataset.type;
     dragging = true;
-    id = crypto.randomUUID();
+    id = state.graph.addNode(typeToAdd);
+
+    state.graphUIData[id] = {
+      x: -1000000,
+      y: -1000000
+    };
+
   })
 
   listen("mousemove", "", e => {
@@ -26,21 +31,12 @@ export function addNodeAdding(el, state) {
 
     const [ x, y ] = state.dataflow.getPoint(...getXY(e, ".dataflow"));
 
-    const node = JSON.parse(JSON.stringify(state.nodeTypes[typeToAdd]));
-
-    // TODO: get default values from types
-    state.graph.nodes[id] = {
-      ...node,
-      type: typeToAdd,
-      data: {
-        x,
-        y
-      }
-    }
+    state.graphUIData[id].x = x;
+    state.graphUIData[id].y = y;
   })
 
   listen("mouseup", ".node-toolbox", () => {
-    if (dragging) delete state.nodes[id];
+    if (dragging) state.graph.removeNode(id);
   })
 
   listen("mouseup", "", e => {

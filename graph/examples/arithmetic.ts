@@ -3,12 +3,36 @@ import { traverse_forward_breadth_first } from "../traversal";
 import { GLangNode } from "../types";
 
 enum ArithmeticOperation {
-    Input,
-    Add,
-    Subtract,
-    Multiply,
-    Divide,
+    Input = "INPUT",
+    Add = "ADD",
+    Subtract = "SUBTRACT",
+    Multiply = "MULTIPLY",
+    Divide = "DIVIDE",
 }
+
+const PARAMETER_NAMES = {
+    "INPUT": {
+        inputs: [],
+        outputs: ["value"]
+    },
+    "ADD": {
+        inputs: ["x", "y"],
+        outputs: ["value"]
+    },
+    "SUBTRACT": {
+        inputs: ["x", "y"],
+        outputs: ["value"]
+    },
+    "MULTIPLY": {
+        inputs: ["x", "y"],
+        outputs: ["value"]
+    },
+    "DIVIDE": {
+        inputs: ["x", "y"],
+        outputs: ["value"]
+    },
+}
+
 
 type NodeData = {
     op: ArithmeticOperation;
@@ -76,13 +100,26 @@ function makeArithmeticGraph() {
         }
     }
 
+    function getInputNames(id) {
+        return PARAMETER_NAMES[id].inputs;
+    }
+
+    function getOutputNames(id) {
+        return PARAMETER_NAMES[id].outputs;
+    }
+
     function removeNode(node_id: string) {
         GLANG.removeNode(graph, node_id);
     }
 
-    function addEdge(src_node_id: string, dst_node_id: string, dst_idx: number): string {
+    function addEdge(
+        src_node_id: string, 
+        src_idx: number,
+        dst_node_id: string, 
+        dst_idx: number
+    ): string {
         // All nodes have a single output so the output index is always 0.
-        const edge_id = GLANG.addEdge(graph, {}, src_node_id, 0, dst_node_id, dst_idx);
+        const edge_id = GLANG.addEdge(graph, {}, src_node_id, src_idx, dst_node_id, dst_idx);
         // Re-evaluate values of all downstream nodes.
         // Note: this is sloppy, we should do a topological sort and evaluate in that order.
         traverse_forward_breadth_first(graph, src_node_id, (graph, node_id, node) => {
@@ -127,6 +164,9 @@ function makeArithmeticGraph() {
             throw new Error("Can't change the value of a non-input node.");
         }
         node.data.value = new_value;
+
+        // events["changeInputValue"](graph, trigger);
+
         traverse_forward_breadth_first(graph, node_id, (graph, node_id, node) => {
             recompute_value(node);
         });
@@ -142,6 +182,21 @@ function makeArithmeticGraph() {
         removeEdge: removeEdge,
         changeNodeOp: changeNodeOp,
         changeInputValue: changeInputValue,
+        getGraph: () => graph,
+        getNodeTypes: () => ArithmeticOperation,
+        getInputNames,
+        getOutputNames,
+        addListener(eventName, callback) {
+
+        },
+        // setGraph(newGraph) {
+        //     graph.setGraph(newGraph);
+        // }
+        // evaluate(triggers) { 
+        //     myEvalFunc(graph, triggers);
+        // } 
+
+        // myGraph.evaluate(triggers) or myEvalFunc(graph, triggers)
     };
 }
 
