@@ -285,3 +285,57 @@ events triggers on graph
   - node
   - edge
 - set value ?
+
+
+```js
+const graph = new Graph();
+const node_1 = addNode(graph, {value: 1}, 0, 1);
+const node_2 = addNode(graph, {value: 2}, 0, 1);
+
+const edge_1 = addEdge(graph, {}, node_1, 0, node_3, 0);
+
+
+const config = {
+  nodeDataTypes: {
+    "ADD": {
+      inputs: ["x", "y"],
+      outputs: ["sum"]
+    },
+    "VALUE": {
+      inputs: [],
+      outputs: ["val"]
+    }
+  },
+
+}
+
+const adderGraph = createGraph(config);
+const adder_node_1 = adderGraph.addNode("ADD");
+const adder_node_2 = adderGraph.addNode("VALUE");
+const adder_node_3 = adderGraph.addNode("VALUE");
+
+const edge_1 = adderGraph.addEdge(adder_node_2, 0, adder_node_1, 0)
+const edge_2 = adderGraph.addEdge(adder_node_3, 0, adder_node_1, 1)
+
+
+adderGraph.addEventListener("edge", (triggers) => {
+  // const node = 
+})
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

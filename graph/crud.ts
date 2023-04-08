@@ -151,6 +151,25 @@ function removeOutput<NodeData, EdgeData>(
     }
 }
 
+function getInputValues<NodeData, EdgeData>(
+    graph: GLangGraph<NodeData, EdgeData>,
+    node_id: string,
+    data_key: string
+): Array<any> {
+    const node = getNode(graph, node_id);
+    const values = node.inputs.map(edge_id => {
+        if (edge_id === null) return null;
+
+        const edge = getEdge(graph, edge_id);
+        const input_id = edge.src.node_id;
+        const input_node = getNode(graph, input_id);
+
+        return input_node.data[data_key];
+    });
+
+    return values;
+}
+
 function addEdge<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     data: EdgeData,
@@ -210,5 +229,6 @@ export {
     removeOutput,
     addEdge,
     removeEdge,
+    getInputValues
 };
 

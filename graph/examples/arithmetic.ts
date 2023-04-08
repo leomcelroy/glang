@@ -1,6 +1,6 @@
 import * as GLANG from "../crud";
 import { traverse_forward_breadth_first } from "../traversal";
-import { GLangNode } from "../types";
+import { GLangNode, GLangGraph } from "../types";
 
 enum ArithmeticOperation {
     Input = "INPUT",
@@ -45,29 +45,19 @@ function makeArithmeticGraph() {
     const graph = GLANG.createGraph<NodeData, EdgeData>();
     const default_input_value = 0;
 
-    function recompute_value(node: GLangNode<NodeData>) {
+    function recompute_value(node_id: string, graph: GLangGraph<NodeData, EdgeData>) {
+        const node = GLANG.getNode(graph, node_id);
         // There's nothing to compute for input nodes.
         if (node.data.op === ArithmeticOperation.Input) {
             return;
         }
 
-        // If either input isn't connected, set the value to null.
-        const lhs_edge_id = node.inputs[0];
-        const rhs_edge_id = node.inputs[1];
-        if (lhs_edge_id === null || rhs_edge_id === null) {
-            node.data.value = null;
-            return;
-        }
+        const [ lhs_value, rhs_value ] = GLANG.getInputValues(
+            graph, 
+            node_id, 
+            "value"
+        );
 
-        // If either input value is null, set the value to null.
-        const lhs_edge = GLANG.getEdge(graph, lhs_edge_id);
-        const rhs_edge = GLANG.getEdge(graph, rhs_edge_id);
-        const lhs_node_id = lhs_edge.src.node_id;
-        const rhs_node_id = rhs_edge.src.node_id;
-        const lhs_node = GLANG.getNode(graph, lhs_node_id);
-        const rhs_node = GLANG.getNode(graph, rhs_node_id);
-        const lhs_value = lhs_node.data.value;
-        const rhs_value = rhs_node.data.value;
         if (lhs_value === null || rhs_value === null) {
             node.data.value = null;
             return;
@@ -123,7 +113,7 @@ function makeArithmeticGraph() {
         // Re-evaluate values of all downstream nodes.
         // Note: this is sloppy, we should do a topological sort and evaluate in that order.
         traverse_forward_breadth_first(graph, src_node_id, (graph, node_id, node) => {
-            recompute_value(node);
+            recompute_value(node_id, graph);
         });
         return edge_id;
     }
@@ -133,7 +123,7 @@ function makeArithmeticGraph() {
         const dst_node_id = edge.dst.node_id;
         GLANG.removeEdge(graph, edge_id);
         traverse_forward_breadth_first(graph, dst_node_id, (graph, node_id, node) => {
-            recompute_value(node);
+            recompute_value(node_id, graph);
         });
     }
 
@@ -154,7 +144,7 @@ function makeArithmeticGraph() {
         }
 
         traverse_forward_breadth_first(graph, node_id, (graph, node_id, node) => {
-            recompute_value(node);
+            recompute_value(node_id, graph);
         });
     }
 
@@ -168,7 +158,7 @@ function makeArithmeticGraph() {
         // events["changeInputValue"](graph, trigger);
 
         traverse_forward_breadth_first(graph, node_id, (graph, node_id, node) => {
-            recompute_value(node);
+            recompute_value(node_id, graph);
         });
     }
 
@@ -195,6 +185,8 @@ function makeArithmeticGraph() {
         // evaluate(triggers) { 
         //     myEvalFunc(graph, triggers);
         // } 
+        // getInputs(nodeId, dataKey) {}
+        // setOutputs(nodeId, dataKey) {}
 
         // myGraph.evaluate(triggers) or myEvalFunc(graph, triggers)
     };

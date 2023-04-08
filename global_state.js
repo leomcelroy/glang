@@ -1,4 +1,31 @@
 import { makeArithmeticGraph } from "./graph/examples/arithmetic.ts";
+import { makeArithmeticGraph as makeGraph } from "./graph/examples/alternative_arithmetic.ts";
+
+const test = makeGraph();
+
+const graph = test.graph;
+
+const node1 = graph.addNode({
+  x: 200,
+  y: 0,
+  inputNames: ["x", "y"],
+  outputNames: ["sum"],
+  value: 0,
+  op: "ADD"
+}, 2, 1);
+
+const node2 = graph.addNode({
+  x: 0,
+  y: 0,
+  inputNames: [],
+  outputNames: ["val"],
+  value: 10,
+  op: "VALUE"
+}, 0, 1);
+
+graph.addEdge({}, node2, 0, node1, 0)
+
+console.log(graph.getGraph(), graph.getInputValues(node1, "value"));
 
 export const global_state = {
   // graph: {
