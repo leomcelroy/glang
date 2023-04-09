@@ -99,9 +99,11 @@ function makeArithmeticGraph() {
         graph.removeNode(node_id);
     }
 
-    function addEdge(src_node_id: string, dst_node_id: string, dst_idx: number): string {
-        // All nodes have a single output so src_idx is always 0.
-        const edge_id = graph.addEdge({}, src_node_id, 0, dst_node_id, dst_idx);
+    function addEdge(src_node_id: string, src_idx: number, dst_node_id: string, dst_idx: number): string {
+        if (src_idx !== 0) {
+            throw new Error("Arithmetic nodes only have a single output.");
+        }
+        const edge_id = graph.addEdge({}, src_node_id, src_idx, dst_node_id, dst_idx);
         evaluate(dst_node_id);
         return edge_id;
     }

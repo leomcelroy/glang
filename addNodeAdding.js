@@ -16,14 +16,14 @@ export function addNodeAdding(el, state) {
 
   listen("mousedown", ".node-type", e => {
     const typeToAdd = e.target.dataset.type;
+    const constructorArg = state.nodeConstructors[typeToAdd];
     dragging = true;
-    id = state.graph.addNode(typeToAdd);
+    id = state.graph.addNode(constructorArg);
 
     state.graphUIData[id] = {
       x: -1000000,
       y: -1000000
     };
-
   })
 
   listen("mousemove", "", e => {
@@ -36,7 +36,9 @@ export function addNodeAdding(el, state) {
   })
 
   listen("mouseup", ".node-toolbox", () => {
-    if (dragging) state.graph.removeNode(id);
+    if (dragging) {
+      state.graph.removeNode(id);
+    }
   })
 
   listen("mouseup", "", e => {

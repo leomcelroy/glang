@@ -5,7 +5,7 @@ const drawNodeInput = (k, index, name) => html`
   <div class="node-input">
     <div
       class=${[
-        "node-input-circle", 
+        "node-input-circle",
         "socket"
       ].join(" ")}
       data-id=${`${k}:in:${index}`}></div>
@@ -22,12 +22,13 @@ const drawNodeOutput = (k, index, name) => html`
   </div>
 `
 
+// TODO This should take the relevant strings as args, so it's not tethered to a particular data
+// structure.
 const drawNode = (item, state) => { // TODO: make this a keyed-render
   const [ k, node ] = item;
-
-  // Terrible
-  const nodeType = state.graph.getNodeTypes()[node.data.op];
-
+  const nodeName = state.getNodeName(node);
+  const inputNames = state.getInputNames(node);
+  const outputNames = state.getOutputNames(node);
   const selected = state.selectedNodes.includes(k);
 
   return html.for(node, k)`
@@ -36,10 +37,10 @@ const drawNode = (item, state) => { // TODO: make this a keyed-render
       data-id=${k}
       style=${`left: ${state.graphUIData[k].x}px; top: ${state.graphUIData[k].y}px;`}>
       <div class="node-title">
-        <div class="node-name">${nodeType}</div>
+        <div class="node-name">${nodeName}</div>
       </div>
-      ${state.graph.getInputNames(nodeType).map((x, i) => drawNodeInput(k, i, x))}
-      ${state.graph.getOutputNames(nodeType).map((x, i) => drawNodeOutput(k, i, x))}
+      ${inputNames.map((x, i) => drawNodeInput(k, i, x))}
+      ${outputNames.map((x, i) => drawNodeOutput(k, i, x))}
       <div class="node-view" id=${k}></div>
     </div>
   `
@@ -134,8 +135,9 @@ const drawSelectBox = box => {
 
 const dropdown = (state) => {
   const searchQuery = state.searchTerm.toLowerCase();
-  const nts = Object.entries(state.graph.getNodeTypes());
-  const filteredNodes = nts.filter(( [ key, value] ) => value.toLowerCase().includes(searchQuery));
+  const filteredNodes = Object.keys(state.nodeConstructors).filter(
+    (nodeType) => nodeType.toLowerCase().includes(searchQuery)
+  );
 
   return html`
     <div class="menu-item dropdown-container">
@@ -145,12 +147,12 @@ const dropdown = (state) => {
         <input class="node-search" .value=${state.searchTerm} @input=${e => {
           state.searchTerm = e.target.value;
         }}/>
-        ${filteredNodes.map(([ key, value ]) => html`
-            <div class="menu-item node-type" data-type=${key}>${key}</div>
+        ${filteredNodes.map((nodeType) => html`
+            <div class="menu-item node-type" data-type=${nodeType}>${nodeType}</div>
           `)}
       </div>
     </div>
-  ` 
+  `
 }
 
 export function view(state) {
@@ -182,7 +184,7 @@ export function view(state) {
           <i class="fa-brands fa-github" style="font-size:24px"></i>
         </a>
       </div>
-   
+
       <div class="dataflow">
         <canvas
           id="background"
@@ -191,19 +193,18 @@ export function view(state) {
 
         <svg class="edges">
           <g>
-            ${Array.from(state.graph.getGraph().edges).map(x => drawEdge(x[1], state))}
+            ${Object.entries(state.graph.getGraph().edges).map(x => drawEdge(x[1], state))}
             ${drawTempEdge(state.tempEdge, state)}
           </g>
         </svg>
-        
+
         <div class="nodes">
           <div class="transform-group">
-            ${Array.from(state.graph.getGraph().nodes).map(e => drawNode(e, state))}
+            ${Object.entries(state.graph.getGraph().nodes).map(e => drawNode(e, state))}
             ${drawSelectBox(state.selectBox)}
           </div>
         </div>
       </div>
-    
 
     </div>
   `

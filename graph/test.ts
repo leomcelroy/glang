@@ -68,8 +68,8 @@ const graph = makeArithmeticGraph();
 const input_1 = graph.addNode(ArithmeticOperation.Input);
 const input_2 = graph.addNode(ArithmeticOperation.Input);
 const add = graph.addNode(ArithmeticOperation.Add);
-graph.addEdge(input_1, add, 0);
-graph.addEdge(input_2, add, 1);
+graph.addEdge(input_1, 0, add, 0);
+graph.addEdge(input_2, 0, add, 1);
 graph.setInputValue(input_1, 2);
 graph.setInputValue(input_2, 2);
 
