@@ -11,7 +11,7 @@ function* output_edge_ids<NodeData>(node: GLangNode<NodeData>): IterableIterator
 
 function* output_edges<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
-    node: GLangNode<NodeData>
+    node: GLangNode<NodeData>,
 ): IterableIterator<GLangEdge<EdgeData>> {
     for (const edge_id of output_edge_ids(node)) {
         yield getEdge(graph, edge_id);
@@ -20,7 +20,7 @@ function* output_edges<NodeData, EdgeData>(
 
 function* output_node_ids<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
-    node: GLangNode<NodeData>
+    node: GLangNode<NodeData>,
 ): IterableIterator<string> {
     for (const edge of output_edges(graph, node)) {
         yield edge.dst.node_id;
@@ -29,7 +29,7 @@ function* output_node_ids<NodeData, EdgeData>(
 
 function* unique_output_node_ids<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
-    node: GLangNode<NodeData>
+    node: GLangNode<NodeData>,
 ): IterableIterator<string> {
     const node_id_set = new Set<string>();
     for (const output_node_id of output_node_ids(graph, node)) {
@@ -40,23 +40,68 @@ function* unique_output_node_ids<NodeData, EdgeData>(
     }
 }
 
+function* input_edge_ids<NodeData>(node: GLangNode<NodeData>): IterableIterator<string> {
+    for (const input of node.inputs) {
+        if (input !== null) yield input;
+    }
+}
+
+function* input_edges<NodeData, EdgeData>(
+    graph: GLangGraph<NodeData, EdgeData>,
+    node: GLangNode<NodeData>,
+): IterableIterator<GLangEdge<EdgeData>> {
+    for (const edge_id of input_edge_ids(node)) {
+        yield getEdge(graph, edge_id);
+    }
+}
+
+function* input_node_ids<NodeData, EdgeData>(
+    graph: GLangGraph<NodeData, EdgeData>,
+    node: GLangNode<NodeData>,
+) {
+    for (const edge of input_edges(graph, node)) {
+        yield edge.src.node_id;
+    }
+}
+
+function* unique_input_node_ids<NodeData, EdgeData>(
+    graph: GLangGraph<NodeData, EdgeData>,
+    node: GLangNode<NodeData>,
+) {
+    const node_id_set = new Set<string>();
+    for (const input_node_id of input_node_ids(graph, node)) {
+        if (!node_id_set.has(input_node_id)) {
+            node_id_set.add(input_node_id);
+            yield input_node_id;
+        }
+    }
+}
+
 enum VisitStatus {
     Unvisited,
     Visiting,
     Visited,
 }
 
-// This function walks over all nodes in the transitive closure of the outputs of the specified node
-// in depth-first order. It maintains a stack of all the parents of the current node, and calls one
-// function when elements are pushed to the stack, and another when they are popped. Thus in a
-// cycle-free graph, when the first function is evaluated on a node, neither function has been
-// evaluated on any of its descendants. And when the second function is called on a node, both the
-// first and second function have been called on all its descendants.
+// This function walks a graph in depth first order. It records the path that has been traversed to
+// reach the current node using a stack. It calls one function (f) when elements are pushed to the
+// stack, and another (g) when they are popped. In a cycle-free graph, when the first function is
+// evaluated on a node, neither function has been evaluated on any of its descendants. And when the
+// second function is called on a node, both the first and second function have been called on all
+// its descendants.
+//
+// The argument child_node_ids must return an iterator for the "child" nodes of a given node. If you
+// pass in unique_output_node_ids, you get a forward traversal. If you pass in
+// unique_input_node_ids, you get a backward traversal.
+//
+// The function returns true (and stops traversing) if a cycle is detected. It returns false
+// otherwise.
 function generic_depth_first_traversal<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     start_node_id: string,
     f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
     g: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+    child_node_ids: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => IterableIterator<string>,
 ): boolean {
     function* start_node_generator(): IterableIterator<string> {
         yield start_node_id;
@@ -95,7 +140,7 @@ function generic_depth_first_traversal<NodeData, EdgeData>(
             node_status.set(next_node_id, VisitStatus.Visiting);
             f(graph, next_node_id, next_node);
             stack[stack.length - 1][0] = next_node_id;
-            stack.push([null, unique_output_node_ids(graph, next_node)]);
+            stack.push([null, child_node_ids(graph, next_node_id, next_node)]);
             continue;
         }
 
@@ -104,6 +149,36 @@ function generic_depth_first_traversal<NodeData, EdgeData>(
     }
 
     return false;
+}
+
+function forward_depth_first_traversal<NodeData, EdgeData>(
+    graph: GLangGraph<NodeData, EdgeData>,
+    start_node_id: string,
+    f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+    g: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+) {
+    return generic_depth_first_traversal(
+        graph,
+        start_node_id,
+        f,
+        g,
+        (graph, node_id, node) => unique_output_node_ids(graph, node),
+    );
+}
+
+function backward_depth_first_traversal<NodeData, EdgeData>(
+    graph: GLangGraph<NodeData, EdgeData>,
+    start_node_id: string,
+    f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+    g: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+) {
+    return generic_depth_first_traversal(
+        graph,
+        start_node_id,
+        f,
+        g,
+        (graph, node_id, node) => unique_input_node_ids(graph, node),
+    );
 }
 
 // This function walks over all nodes in the transitive closure of the outputs of the specified node
@@ -170,6 +245,8 @@ function traverse_backward_breadth_first<NodeData, EdgeData>(
 
 export {
     generic_depth_first_traversal,
+    forward_depth_first_traversal,
+    backward_depth_first_traversal,
     traverse_forward_breadth_first,
     traverse_backward_breadth_first
 };

@@ -1,5 +1,5 @@
 import { createGraph, addNode, addEdge } from "./crud";
-import { generic_depth_first_traversal, traverse_forward_breadth_first, traverse_backward_breadth_first } from "./traversal";
+import { forward_depth_first_traversal, traverse_forward_breadth_first, traverse_backward_breadth_first } from "./traversal";
 import { makeArithmeticGraph, ArithmeticOperation } from "./examples/arithmetic";
 
 //--------------------------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ console.log("")
 */
 
 console.log("out and back (forward)")
-generic_depth_first_traversal(
+forward_depth_first_traversal(
     graph,
     node_1,
     (graph, node_id, node) => { console.log("entering ", node_id, node.data.value); },
