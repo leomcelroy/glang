@@ -1,7 +1,7 @@
 import { createGraph, addNode, addEdge } from "./crud";
-import { forward_depth_first_traversal, traverse_forward_breadth_first, traverse_backward_breadth_first} from "./traversal";
+import { traverse_depth_first_forward, traverse_breadth_first_forward, traverse_breadth_first_backward} from "./traversal";
 import { topological_sort } from "./topological_sort";
-import { makeArithmeticGraph, ArithmeticOperation } from "./examples/arithmetic";
+//import { makeArithmeticGraph, ArithmeticOperation } from "./examples/arithmetic";
 
 //--------------------------------------------------------------------------------------------------
 // Testing construction and traversal of a simple graph.
@@ -33,22 +33,8 @@ const edge_5 = addEdge(graph, {}, node_2, 0, node_5, 0);
 
 console.log(graph);
 
-/*
-console.log("forward")
-traverse_forward_breadth_first(graph, node_1, (graph, node_id, node) => {
-    console.log(node_id, node.data.value);
-});
-console.log("")
-
-console.log("backward")
-traverse_backward_breadth_first(graph, node_4, (graph, node_id, node) => {
-    console.log(node_id, node.data.value);
-});
-console.log("")
-*/
-
-console.log("out and back (forward)")
-forward_depth_first_traversal(
+console.log("depth first (forward)")
+traverse_depth_first_forward(
     graph,
     node_1,
     (graph, node_id, node) => { console.log("entering ", node_id, node.data.value); return false; },
@@ -57,7 +43,19 @@ forward_depth_first_traversal(
 console.log("")
 
 const sorted_node_ids = topological_sort(graph);
-console.log("sorted_node_ids", sorted_node_ids);
+console.log("topologically sorted node ids", sorted_node_ids);
+console.log("")
+
+console.log("breadth first forward")
+traverse_breadth_first_forward(graph, node_1, (graph, node_id, node) => {
+    console.log(node_id, node.data.value);
+});
+console.log("")
+
+console.log("breadth first backward")
+traverse_breadth_first_backward(graph, node_4, (graph, node_id, node) => {
+    console.log(node_id, node.data.value);
+});
 console.log("")
 
 

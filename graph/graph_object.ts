@@ -1,7 +1,9 @@
 import { GLangNode, GLangEdge, GLangGraph } from './types';
 import * as CRUD from './crud';
+import * as Traversal from './traversal';
 
-// This just wraps the functional-style methods in ./crud.ts into an object.
+// This makes a graph object.
+// It just binds the functional-style methods in ./crud.ts and ./traversal.ts to a particular graph.
 export function createGraph<NodeData, EdgeData>() {
     const graph = CRUD.createGraph<NodeData, EdgeData>();
 
@@ -44,6 +46,22 @@ export function createGraph<NodeData, EdgeData>() {
         CRUD.removeEdge(graph, edge_id);
     }
 
+    function traverseDepthFirstForward(
+        node_id: string,
+        f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => boolean,
+        g: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+    ): boolean {
+        return Traversal.traverse_depth_first_forward(graph, node_id, f, g);
+    }
+
+    function traverseDepthFirstBackward(
+        node_id: string,
+        f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => boolean,
+        g: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+    ): boolean {
+        return Traversal.traverse_depth_first_backward(graph, node_id, f, g);
+    }
+
     return {
         getGraph,
         getNode,
@@ -53,5 +71,7 @@ export function createGraph<NodeData, EdgeData>() {
         addEdge,
         removeNode,
         removeEdge,
+        traverseDepthFirstForward,
+        traverseDepthFirstBackward,
     }
 }

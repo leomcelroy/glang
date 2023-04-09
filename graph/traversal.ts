@@ -97,7 +97,7 @@ enum VisitStatus {
 // The argument child_node_ids must return an iterator for the "child" nodes of a given node. If you
 // pass in unique_output_node_ids, you get a forward traversal. If you pass in
 // unique_input_node_ids, you get a backward traversal.
-function generic_depth_first_traversal<NodeData, EdgeData>(
+function traverse_depth_first_generic<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     start_node_id: string,
     f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => boolean,
@@ -155,13 +155,13 @@ function generic_depth_first_traversal<NodeData, EdgeData>(
     return false;
 }
 
-function forward_depth_first_traversal<NodeData, EdgeData>(
+function traverse_depth_first_forward<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     start_node_id: string,
     f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => boolean,
     g: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
 ) {
-    return generic_depth_first_traversal(
+    return traverse_depth_first_generic(
         graph,
         start_node_id,
         f,
@@ -170,13 +170,13 @@ function forward_depth_first_traversal<NodeData, EdgeData>(
     );
 }
 
-function backward_depth_first_traversal<NodeData, EdgeData>(
+function traverse_depth_first_backward<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     start_node_id: string,
     f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => boolean,
     g: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
 ) {
-    return generic_depth_first_traversal(
+    return traverse_depth_first_generic(
         graph,
         start_node_id,
         f,
@@ -187,7 +187,7 @@ function backward_depth_first_traversal<NodeData, EdgeData>(
 
 // This function walks over all nodes in the transitive closure of the outputs of the specified node
 // in breadth-first order, calling the specified function along the way.
-function traverse_forward_breadth_first<NodeData, EdgeData>(
+function traverse_breadth_first_forward<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string,
     f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
@@ -218,7 +218,7 @@ function traverse_forward_breadth_first<NodeData, EdgeData>(
 
 // This function walks over all nodes in the transitive closure of the inputs of the specified node
 // in breadth-first order, calling the specified function along the way.
-function traverse_backward_breadth_first<NodeData, EdgeData>(
+function traverse_breadth_first_backward<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string,
     f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
@@ -248,9 +248,9 @@ function traverse_backward_breadth_first<NodeData, EdgeData>(
 }
 
 export {
-    generic_depth_first_traversal,
-    forward_depth_first_traversal,
-    backward_depth_first_traversal,
-    traverse_forward_breadth_first,
-    traverse_backward_breadth_first
+    traverse_depth_first_generic,
+    traverse_depth_first_forward,
+    traverse_depth_first_backward,
+    traverse_breadth_first_forward,
+    traverse_breadth_first_backward,
 };

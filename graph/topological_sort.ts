@@ -1,5 +1,5 @@
 import { GLangNode, GLangEdge, GLangGraph } from './types';
-import { backward_depth_first_traversal } from './traversal';
+import { traverse_depth_first_backward } from './traversal';
 
 // This functions topologically sorts the nodes in a graph. Its complexity is linear in the number
 // of nodes. It's built on a backwards depth first traversal. Our entry function just ensures we
@@ -9,11 +9,11 @@ import { backward_depth_first_traversal } from './traversal';
 function topological_sort<NodeData, EdgeData>(graph: GLangGraph<NodeData, EdgeData>): string[] {
     const sorted_node_ids: string[] = [];
     const sorted_node_ids_set = new Set<string>();
-    for (const node_id of graph.nodes.keys()) {
+    for (const node_id in graph.nodes) {
         if (sorted_node_ids_set.has(node_id)) {
             continue;
         }
-        backward_depth_first_traversal(
+        traverse_depth_first_backward(
             graph,
             node_id,
             (graph, node_id, node) => {

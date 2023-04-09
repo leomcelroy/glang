@@ -1,38 +1,13 @@
-import * as GLANG from "../crud";
-import { traverse_forward_breadth_first } from "../traversal";
-import { GLangNode, GLangGraph } from "../types";
+import { createGraph } from "../graph_object";
+import { forward_depth_first_traversal } from "../traversal";
 
 enum ArithmeticOperation {
-    Input = "INPUT",
-    Add = "ADD",
-    Subtract = "SUBTRACT",
-    Multiply = "MULTIPLY",
-    Divide = "DIVIDE",
+    Input0,
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
 }
-
-const PARAMETER_NAMES = {
-    "INPUT": {
-        inputs: [],
-        outputs: ["value"]
-    },
-    "ADD": {
-        inputs: ["x", "y"],
-        outputs: ["value"]
-    },
-    "SUBTRACT": {
-        inputs: ["x", "y"],
-        outputs: ["value"]
-    },
-    "MULTIPLY": {
-        inputs: ["x", "y"],
-        outputs: ["value"]
-    },
-    "DIVIDE": {
-        inputs: ["x", "y"],
-        outputs: ["value"]
-    },
-}
-
 
 type NodeData = {
     op: ArithmeticOperation;
@@ -53,8 +28,8 @@ function makeArithmeticGraph() {
         }
 
         const [ lhs_value, rhs_value ] = GLANG.getInputValues(
-            graph, 
-            node_id, 
+            graph,
+            node_id,
             "value"
         );
 
@@ -103,9 +78,9 @@ function makeArithmeticGraph() {
     }
 
     function addEdge(
-        src_node_id: string, 
+        src_node_id: string,
         src_idx: number,
-        dst_node_id: string, 
+        dst_node_id: string,
         dst_idx: number
     ): string {
         // All nodes have a single output so the output index is always 0.
@@ -182,9 +157,9 @@ function makeArithmeticGraph() {
         // setGraph(newGraph) {
         //     graph.setGraph(newGraph);
         // }
-        // evaluate(triggers) { 
+        // evaluate(triggers) {
         //     myEvalFunc(graph, triggers);
-        // } 
+        // }
         // getInputs(nodeId, dataKey) {}
         // setOutputs(nodeId, dataKey) {}
 
