@@ -88,18 +88,19 @@ enum VisitStatus {
 // stack, and another (g) when they are popped. In a cycle-free graph, when the first function is
 // evaluated on a node, neither function has been evaluated on any of its descendants. And when the
 // second function is called on a node, both the first and second function have been called on all
-// its descendants.
+// its descendants. The first function can return true to indicate that the descendants of the node
+// should be skipped.
+//
+// This function returns true (and stops traversing) if a cycle is detected. It returns false
+// otherwise.
 //
 // The argument child_node_ids must return an iterator for the "child" nodes of a given node. If you
 // pass in unique_output_node_ids, you get a forward traversal. If you pass in
 // unique_input_node_ids, you get a backward traversal.
-//
-// The function returns true (and stops traversing) if a cycle is detected. It returns false
-// otherwise.
 function generic_depth_first_traversal<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     start_node_id: string,
-    f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+    f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => boolean,
     g: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
     child_node_ids: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => IterableIterator<string>,
 ): boolean {
@@ -117,13 +118,14 @@ function generic_depth_first_traversal<NodeData, EdgeData>(
         const [prev_node_id, next_node_id_itr] = stack[stack.length - 1];
         const next_node_id: string | undefined = next_node_id_itr.next().value;
 
+        // If the previous node isn't null, exit it.
         if (prev_node_id !== null) {
-            // If the previous node isn't null, exit it.
             const prev_node = getNode(graph, prev_node_id);
             g(graph, prev_node_id, prev_node);
             node_status.set(prev_node_id, VisitStatus.Visited);
         }
 
+        // If the next node isn't undefined, enter it.
         if (next_node_id !== undefined) {
             const status = node_status.get(next_node_id) ?? VisitStatus.Unvisited;
             if (status === VisitStatus.Visiting) {
@@ -135,12 +137,14 @@ function generic_depth_first_traversal<NodeData, EdgeData>(
                 continue;
             }
 
-            // For unvisited nodes, we call f and push next_node's children onto the stack.
+            // Call f on unvisited nodes.
+            // If f returns true, we skip traversal of its descendants.
             const next_node = getNode(graph, next_node_id);
             node_status.set(next_node_id, VisitStatus.Visiting);
-            f(graph, next_node_id, next_node);
-            stack[stack.length - 1][0] = next_node_id;
-            stack.push([null, child_node_ids(graph, next_node_id, next_node)]);
+            if (!f(graph, next_node_id, next_node)) {
+                stack[stack.length - 1][0] = next_node_id;
+                stack.push([null, child_node_ids(graph, next_node_id, next_node)]);
+            }
             continue;
         }
 
@@ -154,7 +158,7 @@ function generic_depth_first_traversal<NodeData, EdgeData>(
 function forward_depth_first_traversal<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     start_node_id: string,
-    f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+    f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => boolean,
     g: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
 ) {
     return generic_depth_first_traversal(
@@ -169,7 +173,7 @@ function forward_depth_first_traversal<NodeData, EdgeData>(
 function backward_depth_first_traversal<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     start_node_id: string,
-    f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+    f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => boolean,
     g: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
 ) {
     return generic_depth_first_traversal(
