@@ -48,16 +48,16 @@ export function createGraph<NodeData, EdgeData>() {
 
     function traverseDepthFirstForward(
         node_id: string,
-        f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => boolean,
-        g: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+        f: (node_id: string, node: GLangNode<NodeData>) => boolean,
+        g: (node_id: string, node: GLangNode<NodeData>) => void,
     ): boolean {
         return Traversal.traverse_depth_first_forward(graph, node_id, f, g);
     }
 
     function traverseDepthFirstBackward(
         node_id: string,
-        f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => boolean,
-        g: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+        f: (node_id: string, node: GLangNode<NodeData>) => boolean,
+        g: (node_id: string, node: GLangNode<NodeData>) => void,
     ): boolean {
         return Traversal.traverse_depth_first_backward(graph, node_id, f, g);
     }

@@ -1,11 +1,12 @@
 import { createGraph, addNode, addEdge } from "./crud";
 import { traverse_depth_first_forward, traverse_breadth_first_forward, traverse_breadth_first_backward} from "./traversal";
 import { topological_sort } from "./topological_sort";
-//import { makeArithmeticGraph, ArithmeticOperation } from "./examples/arithmetic";
+import { makeArithmeticGraph, ArithmeticOperation } from "./examples/arithmetic";
 
 //--------------------------------------------------------------------------------------------------
 // Testing construction and traversal of a simple graph.
 
+/*
 type NodeData = {
     value: number;
 };
@@ -37,8 +38,8 @@ console.log("depth first (forward)")
 traverse_depth_first_forward(
     graph,
     node_1,
-    (graph, node_id, node) => { console.log("entering ", node_id, node.data.value); return false; },
-    (graph, node_id, node) => { console.log("exiting ", node_id, node.data.value); },
+    (node_id, node) => { console.log("entering ", node_id, node.data.value); return false; },
+    (node_id, node) => { console.log("exiting ", node_id, node.data.value); },
 );
 console.log("")
 
@@ -57,20 +58,19 @@ traverse_breadth_first_backward(graph, node_4, (graph, node_id, node) => {
     console.log(node_id, node.data.value);
 });
 console.log("")
+*/
 
 
 //--------------------------------------------------------------------------------------------------
 // Testing construction of an arithmetic graph.
 
-/*
 const graph = makeArithmeticGraph();
 const input_1 = graph.addNode(ArithmeticOperation.Input);
 const input_2 = graph.addNode(ArithmeticOperation.Input);
 const add = graph.addNode(ArithmeticOperation.Add);
-graph.addEdge(input_1, 0, add, 0);
-graph.addEdge(input_2, 0, add, 1);
-graph.changeInputValue(input_1, 2);
-graph.changeInputValue(input_2, 2);
+graph.addEdge(input_1, add, 0);
+graph.addEdge(input_2, add, 1);
+graph.setInputValue(input_1, 2);
+graph.setInputValue(input_2, 2);
 
-console.log(`2 + 2 = ${graph.getNodeValue(add)}`);
-*/
+console.log(`2 + 2 = ${graph.getNode(add).data.value}`);

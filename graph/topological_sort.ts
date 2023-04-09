@@ -16,11 +16,11 @@ function topological_sort<NodeData, EdgeData>(graph: GLangGraph<NodeData, EdgeDa
         traverse_depth_first_backward(
             graph,
             node_id,
-            (graph, node_id, node) => {
+            (node_id, node) => {
                 // Ignore this node's inputs if it's already been sorted.
                 return sorted_node_ids_set.has(node_id);
             },
-            (graph, node_id, node) => {
+            (node_id, node) => {
                 if (!sorted_node_ids_set.has(node_id)) {
                     sorted_node_ids.push(node_id);
                     sorted_node_ids_set.add(node_id);
