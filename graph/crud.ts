@@ -68,7 +68,7 @@ function addNode<NodeData, EdgeData>(
 function removeNode<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string
-) {
+): void {
     if (!(node_id in graph.nodes)) {
         throw new Error(`Node ${node_id} does not exist.`);
     }
@@ -102,7 +102,7 @@ function removeInput<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string,
     input_idx: number
-) {
+): void {
     const node = getNode(graph, node_id);
     if (input_idx >= node.inputs.length) {
         throw new Error(`Input index ${input_idx} is out of bounds.`);
@@ -134,7 +134,7 @@ function removeOutput<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string,
     output_idx: number
-) {
+): void {
     const node = getNode(graph, node_id);
     if (output_idx >= node.outputs.length) {
         throw new Error(`Output index ${output_idx} is out of bounds.`);
@@ -188,7 +188,7 @@ function addEdge<NodeData, EdgeData>(
 function removeEdge<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     edge_id: string
-) {
+): void {
     const edge = getEdge(graph, edge_id);
     const src_node = getNode(graph, edge.src.node_id);
     src_node.outputs[edge.src.idx].delete(edge_id);
