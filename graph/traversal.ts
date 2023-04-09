@@ -169,7 +169,7 @@ function traverse_backward_breadth_first<NodeData, EdgeData>(
 }
 
 export {
-    backtracking_traverse_forward_depth_first,
+    generic_depth_first_traversal,
     traverse_forward_breadth_first,
     traverse_backward_breadth_first
 };
