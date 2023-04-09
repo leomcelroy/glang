@@ -1,38 +1,49 @@
 import { GLangNode, GLangEdge, GLangGraph } from './types';
-import { v4 as uuidv4 } from 'uuid';
 
 function createGraph<NodeData, EdgeData>(): GLangGraph<NodeData, EdgeData> {
     return {
-        nodes: new Map<string, GLangNode<NodeData>>(),
-        edges: new Map<string, GLangEdge<EdgeData>>(),
+        nodes: {},
+        edges: {},
     };
-}
-
-function deleteGraph<NodeData, EdgeData>(graph: GLangGraph<NodeData, EdgeData>) {
-    graph.nodes.clear();
-    graph.edges.clear();
 }
 
 function getNode<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string
 ): GLangNode<NodeData> {
-    const node = graph.nodes.get(node_id);
-    if (node === undefined) {
+    if (!(node_id in graph.nodes)) {
         throw new Error(`Node ${node_id} does not exist.`);
     }
-    return node;
+    return graph.nodes[node_id];
 }
 
 function getEdge<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     edge_id: string
 ): GLangEdge<EdgeData> {
-    const edge = graph.edges.get(edge_id);
-    if (edge === undefined) {
+    if (!(edge_id in graph.edges)) {
         throw new Error(`Edge ${edge_id} does not exist.`);
     }
-    return edge;
+    return graph.edges[edge_id];
+}
+
+function getInputValues<NodeData, EdgeData, InputType>(
+    graph: GLangGraph<NodeData, EdgeData>,
+    node_id: string,
+    get_value: (node_data: NodeData) => InputType,
+): Array<InputType | null> {
+    const node = getNode(graph, node_id);
+    const values = node.inputs.map(edge_id => {
+        if (edge_id === null) return null;
+
+        const edge = getEdge(graph, edge_id);
+        const input_id = edge.src.node_id;
+        const input_node = getNode(graph, input_id);
+
+        return get_value(input_node.data);
+    });
+
+    return values;
 }
 
 function addNode<NodeData, EdgeData>(
@@ -41,8 +52,8 @@ function addNode<NodeData, EdgeData>(
     n_inputs: number = 0,
     n_outputs: number = 0,
 ): string {
-    const node_id = uuidv4();
-    if (graph.nodes.has(node_id)) {
+    const node_id = crypto.randomUUID();
+    if (node_id in graph.nodes) {
         throw new Error(`Node ID ${node_id} already exists.`);
     }
     const node = {
@@ -50,7 +61,7 @@ function addNode<NodeData, EdgeData>(
         inputs: Array(n_inputs).fill(null),
         outputs: Array(n_outputs).fill(new Set<string>()),
     };
-    graph.nodes.set(node_id, node);
+    graph.nodes[node_id] = node;
     return node_id;
 }
 
@@ -58,10 +69,10 @@ function removeNode<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string
 ) {
-    const node = graph.nodes.get(node_id);
-    if (node === undefined) {
+    if (!(node_id in graph.nodes)) {
         throw new Error(`Node ${node_id} does not exist.`);
     }
+    const node = graph.nodes[node_id];
 
     for (const edge_set of node.outputs) {
         for (const edge of edge_set) {
@@ -73,17 +84,15 @@ function removeNode<NodeData, EdgeData>(
             removeEdge(graph, edge);
         }
     }
-    graph.nodes.delete(node_id);
+
+    delete graph.nodes[node_id];
 }
 
 function addInput<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string
 ): number {
-    const node = graph.nodes.get(node_id);
-    if (node === undefined) {
-        throw new Error(`Node ${node_id} does not exist.`);
-    }
+    const node = getNode(graph, node_id);
     const input_idx = node.inputs.length;
     node.inputs.push(null);
     return input_idx;
@@ -94,10 +103,7 @@ function removeInput<NodeData, EdgeData>(
     node_id: string,
     input_idx: number
 ) {
-    const node = graph.nodes.get(node_id);
-    if (node === undefined) {
-        throw new Error(`Node ${node_id} does not exist.`);
-    }
+    const node = getNode(graph, node_id);
     if (input_idx >= node.inputs.length) {
         throw new Error(`Input index ${input_idx} is out of bounds.`);
     }
@@ -118,10 +124,7 @@ function addOutput<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string
 ): number {
-    const node = graph.nodes.get(node_id);
-    if (node === undefined) {
-        throw new Error(`Node ${node_id} does not exist.`);
-    }
+    const node = getNode(graph, node_id);
     const output_idx = node.outputs.length;
     node.outputs.push(new Set<string>());
     return output_idx;
@@ -132,10 +135,7 @@ function removeOutput<NodeData, EdgeData>(
     node_id: string,
     output_idx: number
 ) {
-    const node = graph.nodes.get(node_id);
-    if (node === undefined) {
-        throw new Error(`Node ${node_id} does not exist.`);
-    }
+    const node = getNode(graph, node_id);
     if (output_idx >= node.outputs.length) {
         throw new Error(`Output index ${output_idx} is out of bounds.`);
     }
@@ -151,25 +151,6 @@ function removeOutput<NodeData, EdgeData>(
     }
 }
 
-function getInputValues<NodeData, EdgeData>(
-    graph: GLangGraph<NodeData, EdgeData>,
-    node_id: string,
-    data_key: string
-): Array<any> {
-    const node = getNode(graph, node_id);
-    const values = node.inputs.map(edge_id => {
-        if (edge_id === null) return null;
-
-        const edge = getEdge(graph, edge_id);
-        const input_id = edge.src.node_id;
-        const input_node = getNode(graph, input_id);
-
-        return input_node.data[data_key];
-    });
-
-    return values;
-}
-
 function addEdge<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     data: EdgeData,
@@ -179,8 +160,8 @@ function addEdge<NodeData, EdgeData>(
     dst_idx: number
 ): string {
     // Create the edge.
-    const edge_id = uuidv4();
-    if (graph.edges.has(edge_id)) {
+    const edge_id = crypto.randomUUID();
+    if (edge_id in graph.edges) {
         throw new Error(`Edge ID ${edge_id} already exists.`);
     }
     const edge = {
@@ -188,7 +169,7 @@ function addEdge<NodeData, EdgeData>(
         src: {node_id: src_node_id, idx: src_idx},
         dst: {node_id: dst_node_id, idx: dst_idx},
     };
-    graph.edges.set(edge_id, edge);
+    graph.edges[edge_id] = edge;
 
     // Link it to its src and dst nodes.
     const src_node = getNode(graph, src_node_id);
@@ -213,14 +194,14 @@ function removeEdge<NodeData, EdgeData>(
     src_node.outputs[edge.src.idx].delete(edge_id);
     const dst_node = getNode(graph, edge.dst.node_id);
     dst_node.inputs[edge.dst.idx] = null;
-    graph.edges.delete(edge_id);
+    delete graph.edges[edge_id];
 }
 
 export {
     createGraph,
-    deleteGraph,
     getNode,
     getEdge,
+    getInputValues,
     addNode,
     removeNode,
     addInput,
@@ -229,6 +210,4 @@ export {
     removeOutput,
     addEdge,
     removeEdge,
-    getInputValues
 };
-

@@ -17,9 +17,17 @@ type GLangEdge<EdgeData> = {
     dst: {node_id: string, idx: number};
 };
 
+type GLangNodes<NodeData> = {
+    [node_id: string]: GLangNode<NodeData>;
+}
+
+type GLangEdges<EdgeData> = {
+    [edge_id: string]: GLangEdge<EdgeData>;
+}
+
 type GLangGraph<NodeData, EdgeData> = {
-    nodes: Map<string, GLangNode<NodeData>>;
-    edges: Map<string, GLangEdge<EdgeData>>;
+    nodes: GLangNodes<NodeData>;
+    edges: GLangEdges<EdgeData>;
 };
 
-export {GLangGraph, GLangNode, GLangEdge};
+export {GLangNode, GLangEdge, GLangNodes, GLangEdges, GLangGraph};
