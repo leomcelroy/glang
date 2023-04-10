@@ -190,7 +190,7 @@ function traverse_depth_first_backward<NodeData, EdgeData>(
 function traverse_breadth_first_forward<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string,
-    f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+    f: (node_id: string, node: GLangNode<NodeData>) => void,
 ) {
     const visited = new Set<string>();
     const queue = [node_id];
@@ -205,7 +205,7 @@ function traverse_breadth_first_forward<NodeData, EdgeData>(
         visited.add(node_id);
 
         const node = getNode(graph, node_id);
-        f(graph, node_id, node);
+        f(node_id, node);
 
         for (const output of node.outputs) {
             for (const edge_id of output) {
@@ -221,7 +221,7 @@ function traverse_breadth_first_forward<NodeData, EdgeData>(
 function traverse_breadth_first_backward<NodeData, EdgeData>(
     graph: GLangGraph<NodeData, EdgeData>,
     node_id: string,
-    f: (graph: GLangGraph<NodeData, EdgeData>, node_id: string, node: GLangNode<NodeData>) => void,
+    f: (node_id: string, node: GLangNode<NodeData>) => void,
 ) {
     const visited = new Set<string>();
     const queue = [node_id];
@@ -236,7 +236,7 @@ function traverse_breadth_first_backward<NodeData, EdgeData>(
         visited.add(node_id);
 
         const node = getNode(graph, node_id);
-        f(graph, node_id, node);
+        f(node_id, node);
 
         for (const input of node.inputs) {
             if (input !== null) {
@@ -247,10 +247,42 @@ function traverse_breadth_first_backward<NodeData, EdgeData>(
     }
 }
 
+function descendants<NodeData, EdgeData>(
+    graph: GLangGraph<NodeData, EdgeData>,
+    node_id: string,
+): Set<string> {
+    const result = new Set<string>();
+    traverse_depth_first_forward(
+        graph,
+        node_id,
+        (node_id) => { result.add(node_id); return false; },
+        (node_id) => {},
+    );
+    result.delete(node_id);
+    return result;
+}
+
+function ancestors<NodeData, EdgeData>(
+    graph: GLangGraph<NodeData, EdgeData>,
+    node_id: string,
+): Set<string> {
+    const result = new Set<string>();
+    traverse_depth_first_backward(
+        graph,
+        node_id,
+        (node_id) => { result.add(node_id); return false; },
+        (node_id) => {},
+    );
+    result.delete(node_id);
+    return result;
+}
+
 export {
     traverse_depth_first_generic,
     traverse_depth_first_forward,
     traverse_depth_first_backward,
     traverse_breadth_first_forward,
     traverse_breadth_first_backward,
+    descendants,
+    ancestors,
 };

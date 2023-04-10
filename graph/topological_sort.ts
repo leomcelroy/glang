@@ -31,4 +31,30 @@ function topological_sort<NodeData, EdgeData>(graph: GLangGraph<NodeData, EdgeDa
     return sorted_node_ids;
 }
 
-export { topological_sort };
+function evaluate_in_topological_order<NodeData, EdgeData>(
+    graph: GLangGraph<NodeData, EdgeData>,
+    f: (node_id: string, node: GLangNode<NodeData>) => void,
+): void {
+    const sorted_node_ids = new Set<string>();
+    for (const node_id in graph.nodes) {
+        if (sorted_node_ids.has(node_id)) {
+            continue;
+        }
+        traverse_depth_first_backward(
+            graph,
+            node_id,
+            (node_id, node) => {
+                // Ignore this node's inputs if it's already been sorted.
+                return sorted_node_ids.has(node_id);
+            },
+            (node_id, node) => {
+                if (!sorted_node_ids.has(node_id)) {
+                    sorted_node_ids.add(node_id);
+                    f(node_id, node);
+                }
+            }
+        );
+    }
+}
+
+export { topological_sort, evaluate_in_topological_order };

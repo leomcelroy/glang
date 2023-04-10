@@ -1,4 +1,5 @@
 import { createGraph } from "../graph_object";
+import { GLangNode } from "../types";
 
 enum ArithmeticOperation {
     Input,
@@ -17,7 +18,6 @@ function makeArithmeticGraph() {
     type EdgeData = {};
 
     const graph = createGraph<NodeData, EdgeData>();
-    const topologically_sorted_node_ids: string[] = [];
     const default_input_value: number = 0;
     const eval_listeners: Array<(node_id: string) => void> = [recompute_value];
 
@@ -68,31 +68,29 @@ function makeArithmeticGraph() {
     // Recomputes the value of the specified node and all of its descendants.
     function evaluate(node_id: string): void {
         // Collect all the descendants of this node.
-        const descendants = new Set<string>();
-        graph.traverseDepthFirstForward(
-            node_id,
-            (node_id) => { descendants.add(node_id); return false; },
-            (node_id) => {},
-        );
+        const descendants = graph.descendants(node_id);
+        descendants.add(node_id);
 
         // Run all evaluation listeners on all descendants in topological order.
-        for (const node_id of descendants) {
+        graph.evaluateInTopologicalOrder((node_id: string, node: GLangNode<NodeData>) => {
             if (descendants.has(node_id)) {
                 for (const eval_listener of eval_listeners) {
                     eval_listener(node_id);
                 }
             }
-        }
+        });
     }
 
     function addNode(op: ArithmeticOperation): string {
+        let node_id: string;
         if (op === ArithmeticOperation.Input) {
             // Input nodes have no inputs and one output.
-            return graph.addNode({op: op, value: default_input_value}, 0, 1);
+            node_id = graph.addNode({op: op, value: default_input_value}, 0, 1);
         } else {
             // All other nodes have two inputs and one output.
-            return graph.addNode({op: op, value: null}, 2, 1);
+            node_id = graph.addNode({op: op, value: null}, 2, 1);
         }
+        return node_id;
     }
 
     function removeNode(node_id: string): void {

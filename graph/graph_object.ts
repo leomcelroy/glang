@@ -1,6 +1,7 @@
 import { GLangNode, GLangEdge, GLangGraph } from './types';
 import * as CRUD from './crud';
 import * as Traversal from './traversal';
+import { topological_sort, evaluate_in_topological_order } from './topological_sort';
 
 // This makes a graph object.
 // It just binds the functional-style methods in ./crud.ts and ./traversal.ts to a particular graph.
@@ -62,6 +63,24 @@ export function createGraph<NodeData, EdgeData>() {
         return Traversal.traverse_depth_first_backward(graph, node_id, f, g);
     }
 
+    function descendants(node_id: string): Set<string> {
+        return Traversal.descendants(graph, node_id);
+    }
+
+    function ancestors(node_id: string): Set<string> {
+        return Traversal.ancestors(graph, node_id);
+    }
+
+    function topologicallySortNodes(): Array<string> {
+        return topological_sort(graph);
+    }
+
+    function evaluateInTopologicalOrder(
+        f: (node_id: string, node: GLangNode<NodeData>) => void
+    ): void {
+        evaluate_in_topological_order(graph, f);
+    }
+
     return {
         getGraph,
         getNode,
@@ -73,5 +92,9 @@ export function createGraph<NodeData, EdgeData>() {
         removeEdge,
         traverseDepthFirstForward,
         traverseDepthFirstBackward,
+        descendants,
+        ancestors,
+        topologicallySortNodes,
+        evaluateInTopologicalOrder,
     }
 }

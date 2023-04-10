@@ -48,13 +48,13 @@ console.log("topologically sorted node ids", sorted_node_ids);
 console.log("")
 
 console.log("breadth first forward")
-traverse_breadth_first_forward(graph, node_1, (graph, node_id, node) => {
+traverse_breadth_first_forward(graph, node_1, (node_id, node) => {
     console.log(node_id, node.data.value);
 });
 console.log("")
 
 console.log("breadth first backward")
-traverse_breadth_first_backward(graph, node_4, (graph, node_id, node) => {
+traverse_breadth_first_backward(graph, node_4, (node_id, node) => {
     console.log(node_id, node.data.value);
 });
 console.log("")
