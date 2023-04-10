@@ -12,7 +12,7 @@ export const global_state = {
   },
 
   getNodeName: (node) => {
-    switch (node.type) {
+    switch (node.data.op) {
       case ArithmeticOperation.Input:
         return "Input";
       case ArithmeticOperation.Add:
@@ -36,6 +36,10 @@ export const global_state = {
 
   getOutputNames: (node) => {
     return ["value"];
+  },
+
+  drawNodeContent: (node) => {
+    return node.data.value ?? "null";
   },
 
   graphUIData: {},

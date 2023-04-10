@@ -205,6 +205,11 @@ html, body {
   z-index: 10;
 }
 
+.node-content {
+  display: flex;
+  justify-content: center;
+}
+
 .dataflow {
 /*  background: antiquewhite;*/
   flex: 1;

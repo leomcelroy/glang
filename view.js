@@ -41,6 +41,9 @@ const drawNode = (item, state) => { // TODO: make this a keyed-render
       </div>
       ${inputNames.map((x, i) => drawNodeInput(k, i, x))}
       ${outputNames.map((x, i) => drawNodeOutput(k, i, x))}
+      <div class="node-content">
+        ${state.drawNodeContent(node)}
+      </div>
       <div class="node-view" id=${k}></div>
     </div>
   `
