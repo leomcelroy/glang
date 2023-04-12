@@ -23,9 +23,15 @@ export function addSelectBox(listener, state) {
     start = dataflow.getPoint(x, y);
   })
 
-  listener("mousemove", "", e => {
+  listener("mousemove", "", e => {    
   	document.body.classList.add("no-select");
-    if (!e.shiftKey) return;
+    if (!e.shiftKey) {
+      start = null;
+      end = null;
+      state.selectBox.start = start;
+      state.selectBox.end = end;
+      return;
+    }
     if (start === null) return;
 
     const [x, y] = getXY(e, ".dataflow");
@@ -72,4 +78,5 @@ export function addSelectBox(listener, state) {
     state.selectBox.end = end;
     
   })
+
 }

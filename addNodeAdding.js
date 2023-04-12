@@ -1,4 +1,5 @@
 import { createListener } from "./createListener.js";
+import { render } from "./actions/render.js";
 
 function getXY(e, selector) {
   let rect = document.querySelector(selector).getBoundingClientRect();
@@ -24,6 +25,10 @@ export function addNodeAdding(el, state) {
       x: -1000000,
       y: -1000000
     };
+
+    render();
+
+    state.graph.evaluate(id);
   })
 
   listen("mousemove", "", e => {

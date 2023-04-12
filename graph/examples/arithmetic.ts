@@ -90,6 +90,7 @@ function makeArithmeticGraph() {
             // All other nodes have two inputs and one output.
             node_id = graph.addNode({op: op, value: null}, 2, 1);
         }
+
         return node_id;
     }
 
@@ -132,6 +133,7 @@ function makeArithmeticGraph() {
         removeEdge,
         setInputValue,
         addEvalListener,
+        evaluate
     };
 }
 

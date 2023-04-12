@@ -58,7 +58,7 @@ function addWireManipulation(listen, state) {
     // if connected clickedKey is current input
     const [ node, _inOut, port ] = e.target.dataset.id.split(":");
     // check if input is destination
-    for (const key of state.graph.getGraph().edges.keys()) {
+    for (const key in state.graph.getGraph().edges) {
       const edge = state.graph.getEdge(key);
       if (edge.dst.node_id === node && Number(port) === edge.dst.idx) {
         currentIndex = key;
@@ -207,22 +207,21 @@ function addNodeDragging(listen, state) {
   })
 }
 
-export function addEvents(state) {
+export function addEvents(domNode, state) {
 
-  const dataflow = document.querySelector(".dataflow");
+  const dataflow = domNode.querySelector(".dataflow");
   state.dataflow = addPanZoom(dataflow);
 
-  const body = document.querySelector("body");
-  const listenBody = createListener(body);
+  const listen = createListener(domNode);
 
-  addNodeDragging(listenBody, state);
-  addWireManipulation(listenBody, state);
-  addSelectBox(listenBody, state);
-  addDropUpload(listenBody, state);
+  addNodeDragging(listen, state);
+  addWireManipulation(listen, state);
+  addSelectBox(listen, state);
+  addDropUpload(listen, state);
 
-  addNodeAdding(body, state);
+  addNodeAdding(domNode, state);
 
-  body.addEventListener("keydown", e => {
+  domNode.addEventListener("keydown", e => {
     if (e.keyCode === 191) {
       // const container = body.querySelector(".dropdown-container");
       // global_state.openSearch = true;

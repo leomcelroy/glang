@@ -330,9 +330,13 @@ adderGraph.addEventListener("edge", (triggers) => {
 
 
 
+Next task
 
+- broadcasting with types graph
+- edge data
+- add type signature to name
 
-
+- divide by zero bug
 
 
 

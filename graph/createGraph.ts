@@ -1,41 +1,41 @@
 
-type node = {
+type Node = {
   data: any,
   inputs: Array<string | null>,
   outputs: Array<Set<string>>,
   id: string
 }
 
-type edge = {
+type Edge = {
   data: any,
   src: {node_id: string, idx: number},
   dst: {node_id: string, idx: number},
   id: string
 }
 
-type nodes = {
-  [node_id: string]: node
+type Nodes = {
+  [node_id: string]: Node
 }
 
-type edges = {
-  [edge_id: string]: edge
+type Edges = {
+  [edge_id: string]: Edge
 }
 
-type graph = {
-  nodes: nodes,
-  edges: edges
+type Graph = {
+  nodes: Nodes,
+  edges: Edges
 }
 
 export function createGraph() {
 
-  const nodes: nodes = {};
-  const edges: edges = {};
+  const nodes: Nodes = {};
+  const edges: Edges = {};
 
-  function getGraph(): graph {
+  function getGraph(): Graph {
     return { nodes, edges };
   }
 
-  function getNode(node_id: string): node {
+  function getNode(node_id: string): Node {
     const node = nodes[node_id];
 
     if (node === undefined) throw new Error(`Node ${node_id} does not exist.`);
@@ -48,7 +48,7 @@ export function createGraph() {
 
     if (node_id in nodes) throw new Error(`Graph already has node with id ${node_id}.`)
 
-    const node: node = {
+    const node: Node = {
         data: data,
         inputs: Array(n_inputs).fill(null),
         outputs: Array(n_outputs).fill(new Set<string>()),
@@ -79,7 +79,7 @@ export function createGraph() {
     }
   }
 
-  function getEdge(edge_id: string): edge {
+  function getEdge(edge_id: string): Edge {
     const edge = edges[edge_id];
 
     if (edge === undefined) throw new Error(`Edge ${edge_id} does not exist.`);
@@ -100,7 +100,7 @@ export function createGraph() {
       throw new Error(`Edge ID ${edge_id} already exists.`);
     }
 
-    const edge: edge = {
+    const edge: Edge = {
       data: data,
       src: {node_id: src_node_id, idx: src_idx},
       dst: {node_id: dst_node_id, idx: dst_idx},

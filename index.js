@@ -12,7 +12,9 @@ window.addEventListener("load", () => {
     
 
   render();
-  addEvents(STATE);
+  addEvents(document.body, STATE);
 
   requestAnimationFrame(r);
 });
+
+
