@@ -1,5 +1,6 @@
 import { createListener } from "./createListener.js";
 import { render } from "./actions/render.js";
+import { add_node } from "./actions/add_node.js";
 
 function getXY(e, selector) {
   let rect = document.querySelector(selector).getBoundingClientRect();
@@ -16,19 +17,10 @@ export function addNodeAdding(el, state) {
   let id = "";
 
   listen("mousedown", ".node-type", e => {
-    const typeToAdd = e.target.dataset.type;
-    const constructorArg = state.nodeConstructors[typeToAdd];
     dragging = true;
-    id = state.graph.addNode(constructorArg);
+    const typeToAdd = e.target.dataset.type;
 
-    state.graphUIData[id] = {
-      x: -1000000,
-      y: -1000000
-    };
-
-    render();
-
-    state.graph.evaluate(id);
+    id = add_node(typeToAdd);
   })
 
   listen("mousemove", "", e => {

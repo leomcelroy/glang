@@ -150,24 +150,17 @@ function addNodeDragging(listen, state) {
     if (nodeClicked) {
       state.dataflow.togglePanZoom(true);
       nodeId = nodeClicked.dataset.id;
-      const selected = state.selectedNodes.includes(nodeId);
+      const selected = state.selectedNodes.has(nodeId);
       if (selected && e.detail === 2) { // if selected how to remove
-        state.selectedNodes = state.selectedNodes.filter(id => id !== nodeId);
-      } else if (!state.selectedNodes.includes(nodeId) && !e.shiftKey){
-        state.selectedNodes = [nodeId];
-      } else if (!state.selectedNodes.includes(nodeId) && e.shiftKey) {
-        state.selectedNodes.push(nodeId);
+        state.selectedNodes = state.selectedNodes.delete(id);
+      } else if (!state.selectedNodes.has(nodeId) && !e.shiftKey){
+        state.selectedNodes = new Set([nodeId]);
+      } else if (!state.selectedNodes.has(nodeId) && e.shiftKey) {
+        state.selectedNodes.add(nodeId);
       }
     } else if (!e.shiftKey) {
-      state.selectedNodes = [];
+      state.selectedNodes = new Set();
     }
-
-    // hacky bug fix, for some reason input views intefere with each other
-    const tempSelected = state.selectedNodes;
-    state.selectedNodes = [];
-    
-
-    state.selectedNodes = tempSelected;
     
   })
 
@@ -193,11 +186,6 @@ function addNodeDragging(listen, state) {
     // TODO: if over toolbox then delete node
 
     document.body.classList.remove("no-select");
-
-    // if (state.selectedNodes.length === 1 && moved) {
-    //   state.selectedNodes = [];
-    //   
-    // }
 
     nodeClicked = false;
     nodeId = "";

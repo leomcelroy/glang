@@ -98,7 +98,7 @@ export const global_state = {
     return ["value"];
   },
   graphUIData: {},
-  selectedNodes: [],
+  selectedNodes: new Set(),
   tempEdge: ["", [0 ,0]],
   dataflow: null,
   searchTerm: ""

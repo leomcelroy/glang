@@ -68,7 +68,7 @@ export function addSelectBox(listener, state) {
         if (contains(n, { 
           start: { x: start[0], y: start[1] },
           end: { x: end[0], y: end[1] }
-        }) && !state.selectedNodes.includes(k)) state.selectedNodes.push(k);
+        }) && !state.selectedNodes.has(k)) state.selectedNodes.add(k);
       })
     }
     

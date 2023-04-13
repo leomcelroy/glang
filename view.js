@@ -29,7 +29,7 @@ const drawNode = (item, state) => { // TODO: make this a keyed-render
   const nodeName = state.getNodeName(node);
   const inputNames = state.getInputNames(node);
   const outputNames = state.getOutputNames(node);
-  const selected = state.selectedNodes.includes(k);
+  const selected = state.selectedNodes.has(k);
 
   return html.for(node, k)`
     <div
@@ -179,7 +179,7 @@ export function view(state) {
         </div>
         ${dropdown(state)}
 
-        <div class="menu-item-no-hover" style="position:absolute; right: 40px;">selected: ${state.selectedNodes.length}</div>
+        <div class="menu-item-no-hover" style="position:absolute; right: 40px;">selected: ${state.selectedNodes.size}</div>
         <a class="github-logo" href="https://github.com/leomcelroy/glang">
           <i class="fa-brands fa-github" style="font-size:24px"></i>
         </a>
