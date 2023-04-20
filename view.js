@@ -1,5 +1,6 @@
-import { render, html, svg } from './uhtml.js';
-import { delete_node } from "./actions/delete_node.js";
+import { render, html, svg } from 'lit-html';
+import { repeat } from 'lit-html/directives/repeat.js';
+import { map } from 'lit-html/directives/map.js';
 
 const drawNodeInput = (k, index, name) => html`
   <div class="node-input">
@@ -31,7 +32,9 @@ const drawNode = (item, state) => { // TODO: make this a keyed-render
   const outputNames = state.getOutputNames(node);
   const selected = state.selectedNodes.has(k);
 
-  return html.for(node, k)`
+  if (!state.graphUIData[k]) return "";
+
+  return html`
     <div
       class=${["node", selected ? "selected-node" : ""].join(" ")}
       data-id=${k}
@@ -47,10 +50,8 @@ const drawNode = (item, state) => { // TODO: make this a keyed-render
 }
 
 
-function getRelative(selector0, selector1) {
+function getRelative(el0, el1) {
   // Get the top, left coordinates of two elements
-  const el0 = document.querySelector(selector0);
-  const el1 = document.querySelector(selector1);
   const eleRect = el0?.getBoundingClientRect() || { top: 0, left: 0 };
   const targetRect = el1?.getBoundingClientRect() || { top: 1, left: 1 };
 
@@ -65,15 +66,21 @@ function drawEdge(edge, state) { // there muse be a better way to do this
   const { nodes } = state;
   const outNode_id = edge.src.node_id;
   const outNode_idx = edge.src.idx;
-  const inNode = edge.dst.node_id;
+  const inNode_id = edge.dst.node_id;
   const inNode_idx = edge.dst.idx;
 
   if (!document.querySelector(".socket") || state.dataflow === null) return "";
 
-  const offset0 = getRelative(`[data-id="${outNode_id}:out:${outNode_idx}"]`, `.dataflow`);
-  const offset1 = getRelative(`[data-id="${inNode}:in:${inNode_idx}"]`, `.dataflow`);
-  const rect0 = document.querySelector(`[data-id="${outNode_id}:out:${outNode_idx}"]`)?.getBoundingClientRect() || { top: 0, left: 0 };
-  const rect1 = document.querySelector(`[data-id="${inNode}:in:${inNode_idx}"]`)?.getBoundingClientRect() || { top: 0, left: 0 };
+  const el0 = state.domNode.querySelector(`[data-id="${outNode_id}:out:${outNode_idx}"]`);
+  const el1 = state.domNode.querySelector(`[data-id="${inNode_id}:in:${inNode_idx}"]`);
+
+  if (!el0 || !el1) return "";
+
+  const dataflow = state.domNode.querySelector(`.dataflow`);
+  const offset0 = getRelative(el0, dataflow);
+  const offset1 = getRelative(el1, dataflow);
+  const rect0 = el0.getBoundingClientRect();
+  const rect1 = el1.getBoundingClientRect();
 
   const x0 = offset0[0]+rect0.width/2;
   const y0 = offset0[1]+rect0.height/2;
@@ -92,16 +99,18 @@ function drawEdge(edge, state) { // there muse be a better way to do this
 }
 
 function drawTempEdge(edge, state) {
-  if (!document.querySelector(".socket")) return;
+  if (!state.domNode.querySelector(".socket")) return;
 
   const [ from, [x1, y1] ] = edge;
 
   if (from === "" || state.dataflow === null) return svg``;
 
-  const offset0 = getRelative(`[data-id="${from}"]`, `.dataflow`);
+  const el0 = state.domNode.querySelector(`[data-id="${from}"]`);
+  const el1 = state.domNode.querySelector(`.dataflow`);
+  const offset0 = getRelative(el0, el1);
 
-  const x0 = offset0[0]+document.querySelector(`[data-id="${from}"]`).getBoundingClientRect().width/2;
-  const y0 = offset0[1]+document.querySelector(`[data-id="${from}"]`).getBoundingClientRect().height/2;
+  const x0 = offset0[0]+el0.getBoundingClientRect().width/2;
+  const y0 = offset0[1]+el0.getBoundingClientRect().height/2;
 
   let xDist = Math.abs(x0 - x1);
   xDist = xDist/1.3;
@@ -163,7 +172,7 @@ export function view(state) {
   return html`
     <div class="root">
       <div class="menu">
-        <div class="menu-item" @click=${() => { } }}>
+        <div class="menu-item"}>
           <i class="fa-solid fa-play" style="padding-right: 10px;"></i>
           run
         </div>
@@ -172,7 +181,9 @@ export function view(state) {
           print graph
         </div>
         <div class="menu-item" @click=${() => {
-          state.selectedNodes.forEach(delete_node);
+          for (const node of state.selectedNodes) {
+            state.mutationActions.delete_node(node);
+          }
         }}>
           <i class="fa-solid fa-trash" style="padding-right: 10px;"></i>
           delete
@@ -200,7 +211,7 @@ export function view(state) {
 
         <div class="nodes">
           <div class="transform-group">
-            ${Object.entries(state.graph.getGraph().nodes).map(e => drawNode(e, state))}
+            ${map(Object.entries(state.graph.getGraph().nodes), (item, index) => drawNode(item, state))}
             ${drawSelectBox(state.selectBox)}
           </div>
         </div>

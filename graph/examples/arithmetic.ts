@@ -131,9 +131,10 @@ function makeArithmeticGraph() {
         removeNode,
         addEdge,
         removeEdge,
+        evaluate,
+
         setInputValue,
         addEvalListener,
-        evaluate
     };
 }
 

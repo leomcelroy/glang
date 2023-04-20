@@ -3,10 +3,6 @@ import { addSelectBox } from "./addSelectBox.js";
 import { addDropUpload } from "./addDropUpload.js";
 import { addNodeAdding } from "./addNodeAdding.js";
 
-import { add_connection } from "./actions/add_connection.js";
-import { remove_connection } from "./actions/remove_connection.js";
-import { move_node } from "./actions/move_node.js";
-
 
 const trigger = e => e.composedPath()[0];
 const matchesTrigger = (e, selectorString) => trigger(e).matches(selectorString);
@@ -27,10 +23,8 @@ function pauseEvent(e) {
   return false;
 }
 
-function getRelative(selector0, selector1) {
+function getRelative(el0, el1) {
   // Get the top, left coordinates of two elements
-  const el0 = document.querySelector(selector0);
-  const el1 = document.querySelector(selector1);
   const eleRect = el0.getBoundingClientRect();
   const targetRect = el1.getBoundingClientRect();
 
@@ -41,8 +35,8 @@ function getRelative(selector0, selector1) {
   return [ left, top ];
 }
 
-const getXY = (e, selector) => {
-  let rect = document.querySelector(selector).getBoundingClientRect();
+const getXY = (e, el) => {
+  let rect = el.getBoundingClientRect();
   let x = e.clientX - rect.left; //x position within the element.
   let y = e.clientY - rect.top;  //y position within the element.
 
@@ -82,17 +76,20 @@ function addWireManipulation(listen, state) {
 
   listen("mousemove", "", e => {
     if (from !== "") {
-      const rect = document.querySelector(`[data-id="${from}"]`).getBoundingClientRect();
-      const [ rx, ry ] = getRelative(`[data-id="${from}"]`, ".dataflow");
+      const rect = state.domNode.querySelector(`[data-id="${from}"]`).getBoundingClientRect();
+      const el0 = state.domNode.querySelector(`[data-id="${from}"]`);
+      const el1 = state.domNode.querySelector(".dataflow");
+      const [ rx, ry ] = getRelative(el0, el1);
+
       state.tempEdge = [
         from,
-        getXY(e, ".dataflow")
+        getXY(e, el1)
       ];
       
     }
 
     if (currentIndex !== "") {
-      remove_connection(currentIndex);
+      state.mutationActions.remove_connection(currentIndex);
       currentIndex = "";
     }
   })
@@ -114,9 +111,9 @@ function addWireManipulation(listen, state) {
       }
       // console.log("add", from, to);
 
-      if (currentIndex !== "") remove_connection(currentIndex);
+      if (currentIndex !== "") state.mutationActions.remove_connection(currentIndex);
       
-      add_connection(from, to);
+      state.mutationActions.add_connection(from, to);
     }
 
     from = "";
@@ -136,7 +133,7 @@ function addNodeDragging(listen, state) {
 
   listen("mousedown", "", e => {
 
-    document.body.classList.add("no-select");
+    state.domNode.classList.add("no-select");
     const path = e.composedPath();
     if (path.some(div => div.matches && div.matches(".socket"))) {
       state.dataflow.togglePanZoom(true);
@@ -171,7 +168,7 @@ function addNodeDragging(listen, state) {
 
     const scale = state.dataflow.scale()
     state.selectedNodes.forEach(id => {
-      move_node(
+      state.mutationActions.move_node(
         id,
         e.movementX/scale,
         e.movementY/scale
@@ -185,7 +182,7 @@ function addNodeDragging(listen, state) {
   listen("mouseup", "", e => {
     // TODO: if over toolbox then delete node
 
-    document.body.classList.remove("no-select");
+    state.domNode.classList.remove("no-select");
 
     nodeClicked = false;
     nodeId = "";

@@ -15,6 +15,18 @@ html, body {
                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
+.graph-1 {
+  width: 100%;
+  height: 50%;
+}
+
+.graph-2 {
+  width: 100%;
+  height: 50%;
+}
+
+
+
 .root {
   width: 100%;
   height: 100%;
@@ -231,7 +243,7 @@ html, body {
   background-position: var(--offset-x, 0) var(--offset-y, 0);
   width: 100%;
   height: 100%;
-  position: fixed;
+  position: absolute;
 }
 
 .github-logo {
