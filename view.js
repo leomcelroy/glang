@@ -211,7 +211,7 @@ export function view(state) {
 
         <div class="nodes">
           <div class="transform-group">
-            ${map(Object.entries(state.graph.getGraph().nodes), (item, index) => drawNode(item, state))}
+            ${repeat(Object.entries(state.graph.getGraph().nodes), item => item[0], (item, index) => drawNode(item, state))}
             ${drawSelectBox(state.selectBox)}
           </div>
         </div>
