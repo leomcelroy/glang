@@ -332,6 +332,7 @@ function broadcast(
       data: [0],
       shape: [1]
   };
+  
   // let shape1Idx = shape1.length - 1;
   // let shape2Idx = shape2.length - 1;
   // while (shape1Idx >= 0 || shape2Idx >= 0) {
