@@ -9,54 +9,24 @@ enum BroadcastingOperation {
     Multiply,
 }
 
+type NDArray = {
+    data: Array<number>;
+    shape: Array<number>;
+};
+
+type NodeData = {
+    op: BroadcastingOperation;
+    value: NDArray;
+};
+
+type EdgeData = {};
+
+
 function makeBroadcastingGraph() {
-    type NDArray = {
-        data: Array<number>;
-        shape: Array<number>;
-    };
-
-    function get_strides(shape: Array<number>): Array<number> {
-        const strides = [];
-        let stride = 1;
-        for (let i = shape.length - 1; i >= 0; i--) {
-            strides.push(stride);
-            stride *= shape[i];
-        }
-        return strides.reverse();
-    }
-
-    // This functions grabs a single number from an array.
-    // TODO Eventually we'll want to support slicing as well.
-    function get_element(array: NDArray, indices: Array<number>): number {
-        if (indices.length !== array.shape.length) {
-            throw new Error("Indices must have the same length as the array's shape.");
-        }
-
-        const strides = get_strides(array.shape);
-
-        let index = 0;
-        for (let i = 0; i < indices.length; i++) {
-            index += indices[i] * strides[i];
-        }
-
-        return array.data[index];
-    }
-
-    function shapes_are_compatible(lhs_shape: Array<number>, rhs_shape: Array<number>): boolean {
-        // TODO
-        // Maybe this actually returns a new shape?
-        return true;
-    }
 
 
     // TODO implement mutual iteration for arrays with compatible shapes
 
-    type NodeData = {
-        op: BroadcastingOperation;
-        value: NDArray;
-    };
-
-    type EdgeData = {};
 
     const graph = createGraph<NodeData, EdgeData>();
     const zero_array: NDArray = {data: [0], shape: [1]};
@@ -215,9 +185,19 @@ function makeBroadcastingGraph() {
 }
 
 function mutually_iterate(matrix0, matrix1, fn) {
-    const finalShape = resultingShape(matrix0.shape, matrix1.shape);
+    const shape = resultingShape(matrix0.shape, matrix1.shape);
 
+    const value = new Array(shape.reduce((acc, cur) => acc*cur, 1));
 
+    shape.forEach(index => {
+        // const fullIndex = 
+
+    });
+
+    return {
+        value,
+        shape
+    }
 }
 
 function resultingShape(shape0, shape1) {
@@ -250,4 +230,51 @@ function resultingShape(shape0, shape1) {
     : null;
 }
 
+function get_strides(shape: Array<number>): Array<number> {
+    const strides = [];
+    let stride = 1;
+    for (let i = shape.length - 1; i >= 0; i--) {
+        strides.push(stride);
+        stride *= shape[i];
+    }
+    return strides.reverse();
+}
+
+// This functions grabs a single number from an array.
+// TODO Eventually we'll want to support slicing as well.
+function get_element(array: NDArray, indices: Array<number>): number {
+    if (indices.length !== array.shape.length) {
+        throw new Error("Indices must have the same length as the array's shape.");
+    }
+
+    const strides = get_strides(array.shape);
+
+    let index = 0;
+    for (let i = 0; i < indices.length; i++) {
+        index += indices[i] * strides[i];
+    }
+
+    return array.data[index];
+}
+
+const test0 = {
+    data: [0, 1, 2, 2],
+    shape: [2, 2]
+};
+
+
+const test1 = {
+    data: [1, 2],
+    shape: [1]
+};
+
+
+mutually_iterate(test0, test1, (x, y) => 0);
+
 export { makeBroadcastingGraph, BroadcastingOperation };
+
+
+
+
+
+
