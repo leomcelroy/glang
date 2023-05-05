@@ -26,13 +26,7 @@ function makeBroadcastingGraph() {
         // index = indices[0] * (array.shape[1] * array.shape[2])
         //     + indices[1] * array.shape[2] + indices[2];
 
-        let index = [];
-        let x = i;
-        for (let d = 0; d < compatible.length; d++) {
-            const divisor = compatible.slice(d+1).reduce((acc, cur) => acc * cur, 1);
-            index.push(Math.floor(x/divisor));
-            x = x%divisor;
-        }
+
     }
 
     function shapes_are_compatible(lhs_shape: Array<number>, rhs_shape: Array<number>): boolean {
@@ -205,6 +199,42 @@ function makeBroadcastingGraph() {
         addEvalListener,
         evaluate
     };
+}
+
+function mutually_iterate(matrix0, matrix1, fn) {
+    const finalShape = resultingShape(matrix0.shape, matrix1.shape);
+
+    
+}
+
+function resultingShape(shape0, shape1) {
+  let match = true;
+
+  const lengths = [ shape0.length, shape1.length ];
+
+  const upper = Math.max(...lengths);
+  const lower = Math.min(...lengths);
+  const dimensions = [];
+
+  for (let i = 0; i < upper; i++) {
+    const dimension0 = shape0.at(-(i+1));
+    const dimension1 = shape1.at(-(i+1));
+
+    if (i >= lower) {
+      dimensions.push(dimension0 || dimension1);
+      continue;
+    }
+
+    dimensions.push(dimension0 === dimension1 ? dimension0 : dimension0 * dimension1);
+
+    if (dimension0 === 1 || dimension1 === 1) continue;
+    if (dimension0 !== dimension1) match = false;
+
+  }
+  
+  return match
+    ? dimensions.reverse()
+    : null;
 }
 
 export { makeBroadcastingGraph, BroadcastingOperation };
