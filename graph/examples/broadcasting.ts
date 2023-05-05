@@ -189,10 +189,14 @@ function mutually_iterate(matrix0, matrix1, fn) {
 
     const value = new Array(shape.reduce((acc, cur) => acc*cur, 1));
 
-    shape.forEach(index => {
-        // const fullIndex = 
+    // shape.forEach(index => {
+    //     // const fullIndex = 
 
-    });
+    // });
+
+    for (let i = 0; i < value.length; i++) {
+
+    }
 
     return {
         value,
@@ -257,19 +261,106 @@ function get_element(array: NDArray, indices: Array<number>): number {
     return array.data[index];
 }
 
+function broadcastIndex(index, shape) {
+
+    let inIndex = [];
+    for (let i = 0; i < shape.length; i++) {
+        inIndex.push(
+            index[i] >= shape[i] ? shape[i]-1 : index[i]
+        )
+    }
+
+    let flatIndex = 0;
+    for (let i = 0; i < shape.length; i++) {
+        flatIndex += inIndex[i] * shape.slice(i + 1).reduce((a, b) => a * b, 1);
+    }
+
+    return flatIndex;
+}
+
+function broadcast(
+    { data: arr1, shape: shape1 }, 
+    { data: arr2, shape: shape2 }, 
+    func
+  ) {
+  // Determine the shape of the output array
+  const outShape = [];
+  let shape1Idx = shape1.length - 1;
+  let shape2Idx = shape2.length - 1;
+  while (shape1Idx >= 0 || shape2Idx >= 0) {
+    const dim1 = shape1Idx >= 0 ? shape1[shape1Idx] : 1;
+    const dim2 = shape2Idx >= 0 ? shape2[shape2Idx] : 1;
+    const maxDim = Math.max(dim1, dim2);
+    outShape.unshift(maxDim);
+    shape1Idx--;
+    shape2Idx--;
+  }
+  
+  // Create the output array
+  const outArr = new Array(outShape.reduce((acc, val) => acc * val, 1));
+  
+  // Loop over the output array, applying the function to the appropriate elements
+  for (let i = 0; i < outArr.length; i++) {
+    const coords = [];
+    let index = i;
+    for (let k = outShape.length - 1; k >= 0; k--) {
+      coords[k] = index % outShape[k];
+      index = Math.floor(index / outShape[k]);
+    }
+
+    const inShape1 = shape1.slice();
+    while (inShape1.length < outShape.length) inShape1.unshift(1);
+
+    const inShape2 = shape2.slice();
+    while (inShape2.length < outShape.length) inShape2.unshift(1);
+
+
+    const idxArr = shapedIndex(i, outShape);
+
+    const idx1 = broadcastIndex(idxArr, inShape1);
+    const idx2 = broadcastIndex(idxArr, inShape2);
+
+    const val1 = arr1[idx1];
+    const val2 = arr2[idx2];
+
+    outArr[i] = func(val1, val2);
+  }
+  
+ 
+  
+  return { data: outArr, shape: outShape };
+}
+
+function shapedIndex(i, shape) {
+    let index = [];
+    let x = i;
+    for (let d = 0; d < shape.length; d++) {
+      const divisor = shape.slice(d+1).reduce((acc, cur) => acc * cur, 1);
+      index.push(Math.floor(x/divisor));
+      x = x%divisor;
+    }
+
+    return index;
+}
+
 const test0 = {
-    data: [0, 1, 2, 2],
-    shape: [2, 2]
+    data: [
+        1, 
+        3,
+    ],
+    shape: [2, 1]
 };
 
 
 const test1 = {
-    data: [1, 2],
-    shape: [1]
+    data: [
+        5, 6
+    ],
+    shape: [2]
 };
 
-
-mutually_iterate(test0, test1, (x, y) => 0);
+const result = broadcast(test0, test1, (x, y) => x + y);
+console.log(result.data, result.shape);
 
 export { makeBroadcastingGraph, BroadcastingOperation };
 
