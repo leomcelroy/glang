@@ -184,18 +184,61 @@ function makeBroadcastingGraph() {
     };
 }
 
-function mutually_iterate(matrix0, matrix1, fn) {
+function mutually_iterate(matrix0: NDArray, matrix1: NDArray, fn) {
+    // Compute the shape of the result, and allocate an array of the correct size.
     const shape = resultingShape(matrix0.shape, matrix1.shape);
-
     const value = new Array(shape.reduce((acc, cur) => acc*cur, 1));
 
-    // shape.forEach(index => {
-    //     // const fullIndex = 
 
-    // });
+    // Pad the shape of array with less axes with 1s (on the left).
+    const shape0 = matrix0.shape.slice();
+    const shape1 = matrix1.shape.slice();
+    while (shape0.length < shape1.length) {
+        shape0.unshift(1);
+    }
+    while (shape1.length < shape0.length) {
+        shape1.unshift(1);
+    }
 
-    for (let i = 0; i < value.length; i++) {
+    // Iterate over the arrays.
+    const idx0 = new Array(shape0.length).fill(0);
+    const idx1 = new Array(shape1.length).fill(0);
+    let idx = 0;
+    while (idx0[0] < shape0[0] && idx1[0] < shape1[0]) {
+        // Chop off leading ones from the indices.
+        let first_nonzero = shape0.findIndex((x) => x !== 1);
+        const val0 = get_element(matrix0, idx0.slice(first_nonzero));
+        first_nonzero = shape1.findIndex((x) => x !== 1);
+        const val1 = get_element(matrix1, idx1.slice(first_nonzero));
+        value[idx] = fn(val0, val1);
+        ++idx;
 
+        // Increment the indices.
+        let axis = shape0.length;
+        while (axis > 0) {
+            --axis;
+
+            // If both shapes are the same, increment both indices.
+            if (shape0[axis] === shape1[axis]) {
+                ++idx0[axis];
+                ++idx1[axis];
+                if (idx0[axis] === shape0[axis]) {
+                    idx0[axis] = 0;
+                    idx1[axis] = 0;
+                    continue;
+                }
+                break;
+            }
+
+            // One of the shapes is 1.
+            if (shape0[axis] === 1) {
+                idx0[axis] = 0;
+                ++idx1[axis];
+            } else {
+                ++idx0[axis];
+                idx1[axis] = 0;
+            }
+        }
     }
 
     return {
@@ -284,17 +327,23 @@ function broadcast(
     func
   ) {
   // Determine the shape of the output array
-  const outShape = [];
-  let shape1Idx = shape1.length - 1;
-  let shape2Idx = shape2.length - 1;
-  while (shape1Idx >= 0 || shape2Idx >= 0) {
-    const dim1 = shape1Idx >= 0 ? shape1[shape1Idx] : 1;
-    const dim2 = shape2Idx >= 0 ? shape2[shape2Idx] : 1;
-    const maxDim = Math.max(dim1, dim2);
-    outShape.unshift(maxDim);
-    shape1Idx--;
-    shape2Idx--;
-  }
+  const outShape = resultingShape(shape1, shape2);
+  if (outShape === null) return {
+      data: [0],
+      shape: [1]
+  };
+  // let shape1Idx = shape1.length - 1;
+  // let shape2Idx = shape2.length - 1;
+  // while (shape1Idx >= 0 || shape2Idx >= 0) {
+  //   const dim1 = shape1Idx >= 0 ? shape1[shape1Idx] : 1;
+  //   const dim2 = shape2Idx >= 0 ? shape2[shape2Idx] : 1;
+  //   const maxDim = Math.max(dim1, dim2);
+  //   outShape.unshift(maxDim);
+  //   shape1Idx--;
+  //   shape2Idx--;
+  // }
+
+
   
   // Create the output array
   const outArr = new Array(outShape.reduce((acc, val) => acc * val, 1));
@@ -345,27 +394,31 @@ function shapedIndex(i, shape) {
 
 const test0 = {
     data: [
-        1, 
-        3,
+        0, 0, 
+        10, 10, 
+        20, 20,
+        30, 30
     ],
-    shape: [2, 1]
+    shape: [4, 2]
 };
 
 
 const test1 = {
     data: [
-        5, 6
+        0, 1, 2
     ],
-    shape: [2]
+    shape: [3]
 };
 
-const result = broadcast(test0, test1, (x, y) => x + y);
-console.log(result.data, result.shape);
+
+console.log(test0);
+console.log(test1);
+
+const resultBroadcast = broadcast(test0, test1, (x, y) => x + y);
+console.log(resultBroadcast.data, resultBroadcast.shape);
+
+
+const resultIterate = mutually_iterate(test0, test1, (x, y) => x + y);
+console.log(resultBroadcast);
 
 export { makeBroadcastingGraph, BroadcastingOperation };
-
-
-
-
-
-
