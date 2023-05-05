@@ -1,5 +1,5 @@
-const getXY = (e, selector) => {
-  let rect = document.querySelector(selector).getBoundingClientRect();
+const getXY = (e, el) => {
+  let rect = el.getBoundingClientRect();
   let x = e.clientX - rect.left; //x position within the element.
   let y = e.clientY - rect.top;  //y position within the element.
 
@@ -19,12 +19,12 @@ export function addSelectBox(listener, state) {
 
     if (!e.shiftKey) return;
 
-    const [x, y] = getXY(e, ".dataflow");
+    const [x, y] = getXY(e, state.domNode.querySelector(".dataflow"));
     start = dataflow.getPoint(x, y);
   })
 
   listener("mousemove", "", e => {    
-  	document.body.classList.add("no-select");
+  	state.domNode.classList.add("no-select");
     if (!e.shiftKey) {
       start = null;
       end = null;
@@ -34,7 +34,7 @@ export function addSelectBox(listener, state) {
     }
     if (start === null) return;
 
-    const [x, y] = getXY(e, ".dataflow");
+    const [x, y] = getXY(e, state.domNode.querySelector(".dataflow"));
     end = dataflow.getPoint(x, y);
 
     state.selectBox.start = [ 
@@ -61,7 +61,7 @@ export function addSelectBox(listener, state) {
 
   listener("mouseup", "", e => {
     if (!e.shiftKey) return;
-  	document.body.classList.remove("no-select");
+  	state.domNode.classList.remove("no-select");
     if (start && end) {
       // select
       Object.entries(state.graphUIData).forEach(([k, n]) => {

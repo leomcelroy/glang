@@ -1,27 +1,33 @@
 import { addEvents } from "./addEvents.js";
+import { render } from "lit-html";
+import { view } from "./view.js";
 
 export function createGraphUI(domNode, config) {
   const componentState = initState(config);
 
-  const mutatationActions = createMutationActions(domNode, componentState);
+  componentState.domNode = domNode;
+
+  const mutationActions = createMutationActions(domNode, componentState);
 
   componentState.mutationActions = mutationActions;
 
-  mutatationActions.render();
+  mutationActions.render();
   addEvents(domNode, componentState);
 
   const r = (time) => {
-    mutatationActions.render();
+    mutationActions.render();
     requestAnimationFrame(r);
   };
 
   requestAnimationFrame(r);
+
+  return componentState;
 }
 
 function createMutationActions(domNode, state) {
   return {
     render() {
-      r(domNode, view(state));
+      render(view(state), domNode);
     },
     add_node(menuString) {
       const constructorArg = state.nodeConstructors[menuString];
@@ -80,6 +86,7 @@ function initState(config) {
     tempEdge: ["", [0 ,0]],
     dataflow: null,
     searchTerm: "",
+    domNode: null,
     mutationActions: null
   }
 }
