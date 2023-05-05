@@ -15,6 +15,16 @@ function makeBroadcastingGraph() {
         shape: Array<number>;
     };
 
+    function get_strides(shape: Array<number>): Array<number> {
+        const strides = [];
+        let stride = 1;
+        for (let i = shape.length - 1; i >= 0; i--) {
+            strides.push(stride);
+            stride *= shape[i];
+        }
+        return strides.reverse();
+    }
+
     // This functions grabs a single number from an array.
     // TODO Eventually we'll want to support slicing as well.
     function get_element(array: NDArray, indices: Array<number>): number {
@@ -22,11 +32,14 @@ function makeBroadcastingGraph() {
             throw new Error("Indices must have the same length as the array's shape.");
         }
 
-        // we want this for an array with 3 axes
-        // index = indices[0] * (array.shape[1] * array.shape[2])
-        //     + indices[1] * array.shape[2] + indices[2];
+        const strides = get_strides(array.shape);
 
+        let index = 0;
+        for (let i = 0; i < indices.length; i++) {
+            index += indices[i] * strides[i];
+        }
 
+        return array.data[index];
     }
 
     function shapes_are_compatible(lhs_shape: Array<number>, rhs_shape: Array<number>): boolean {
@@ -204,7 +217,7 @@ function makeBroadcastingGraph() {
 function mutually_iterate(matrix0, matrix1, fn) {
     const finalShape = resultingShape(matrix0.shape, matrix1.shape);
 
-    
+
 }
 
 function resultingShape(shape0, shape1) {
@@ -231,7 +244,7 @@ function resultingShape(shape0, shape1) {
     if (dimension0 !== dimension1) match = false;
 
   }
-  
+
   return match
     ? dimensions.reverse()
     : null;
