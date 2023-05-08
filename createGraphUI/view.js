@@ -30,6 +30,8 @@ const drawNode = (item, state) => { // TODO: make this a keyed-render
   const nodeName = state.getNodeName(node);
   const inputNames = state.getInputNames(node);
   const outputNames = state.getOutputNames(node);
+
+  // console.log(state.selectedNodes);
   const selected = state.selectedNodes.has(k);
 
   if (!state.graphUIData[k]) return "";

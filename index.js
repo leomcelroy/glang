@@ -1,6 +1,6 @@
 import { html, render } from "lit-html";
 import { ArithmeticOperation, makeArithmeticGraph } from "./graph/examples/arithmetic.ts";
-import { createGraphUI } from "./createGraphUI.js";
+import { createGraphUI } from "./createGraphUI/createGraphUI.js";
 
 const config = {
   graph: makeArithmeticGraph(),

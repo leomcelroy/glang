@@ -1,5 +1,4 @@
 import { createListener } from "./createListener.js";
-import { render } from "./actions/render.js";
 
 function getXY(e, el) {
   let rect = el.getBoundingClientRect();

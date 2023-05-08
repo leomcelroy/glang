@@ -96,15 +96,15 @@ function makeBroadcastingGraph() {
         }
 
         // If both inputs are connected and defined, we can actually do some math.
-        node.data.value.data = [];
-        switch (node.data.op) {
-            case BroadcastingOperation.Add:
-                node.data.value = mutually_iterate(lhs_value, rhs_value, (lhs, rhs) => lhs + rhs);
-                break;
-            case BroadcastingOperation.Multiply:
-                node.data.value = mutually_iterate(lhs_value, rhs_value, (lhs, rhs) => lhs * rhs);
-                break;
-        }
+        
+        const fn = {
+            [BroadcastingOperation.Add]: (lhs, rhs) => lhs + rhs,
+            [BroadcastingOperation.Multiply]: (lhs, rhs) => lhs * rhs,
+        }[node.data.op];
+
+        if (!fn) throw new Error("Unknown node op.");
+
+        node.data.value = broadcast(lhs_value, rhs_value, fn);
     }
 
     // Recomputes the value of the specified node and all of its descendants.
@@ -363,7 +363,6 @@ function broadcast(
 
     const inShape2 = shape2.slice();
     while (inShape2.length < outShape.length) inShape2.unshift(1);
-
 
     const idxArr = shapedIndex(i, outShape);
 

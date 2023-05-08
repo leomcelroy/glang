@@ -149,7 +149,7 @@ function addNodeDragging(listen, state) {
       nodeId = nodeClicked.dataset.id;
       const selected = state.selectedNodes.has(nodeId);
       if (selected && e.detail === 2) { // if selected how to remove
-        state.selectedNodes = state.selectedNodes.delete(id);
+        state.selectedNodes.delete(nodeId);
       } else if (!state.selectedNodes.has(nodeId) && !e.shiftKey){
         state.selectedNodes = new Set([nodeId]);
       } else if (!state.selectedNodes.has(nodeId) && e.shiftKey) {
