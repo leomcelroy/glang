@@ -2,7 +2,7 @@
 type Node = {
   data: any,
   inputs: Array<string | null>,
-  outputs: Array<Set<string>>,
+  outputs: Array<Array<string>>,
   id: string
 }
 
@@ -51,7 +51,7 @@ export function createGraph() {
     const node: Node = {
         data: data,
         inputs: Array(n_inputs).fill(null),
-        outputs: Array(n_outputs).fill(new Set<string>()),
+        outputs: Array(n_outputs).fill(null).map(x => []),
         id: node_id
     };
 
@@ -77,6 +77,8 @@ export function createGraph() {
         removeEdge(edge);
       }
     }
+
+    delete nodes[node_id];
   }
 
   function getEdge(edge_id: string): Edge {
@@ -111,7 +113,7 @@ export function createGraph() {
 
     // Link it to its src and dst nodes.
     const src_node = getNode(src_node_id);
-    src_node.outputs[src_idx].add(edge_id);
+    src_node.outputs[src_idx].push(edge_id);
     const dst_node = getNode(dst_node_id);
     const existing_edge = dst_node.inputs[dst_idx];
 
@@ -128,7 +130,7 @@ export function createGraph() {
 
     const edge = getEdge(edge_id);
     const src_node = getNode(edge.src.node_id);
-    src_node.outputs[edge.src.idx].delete(edge_id);
+    src_node.outputs[edge.src.idx] = src_node.outputs[edge.src.idx].filter(id => id !== edge_id);
     const dst_node = getNode(edge.dst.node_id);
     dst_node.inputs[edge.dst.idx] = null;
     delete edges[edge_id];

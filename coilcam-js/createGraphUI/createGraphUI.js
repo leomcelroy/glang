@@ -30,8 +30,7 @@ function createMutationActions(domNode, state) {
       render(view(state), domNode);
     },
     add_node(menuString) {
-      const constructorArg = state.nodeConstructors[menuString];
-      const id = state.graph.addNode(constructorArg);
+      const id = state.addNode(menuString);
 
       state.graphUIData[id] = {
         x: -1000000,
@@ -40,7 +39,7 @@ function createMutationActions(domNode, state) {
 
       this.render();
 
-      state.graph.evaluate(id);
+      state.evaluate(id);
 
       return id;
     },
@@ -59,10 +58,12 @@ function createMutationActions(domNode, state) {
       this.render();
     },
     add_connection(from, to) {
+      if (state.addEdge) state.addEdge(from, to);
+
       const [srcNode, _inOut0, srcPort ] = from.split(":");
       const [dstNode, _inOut1, dstPort ] = to.split(":");
 
-      state.graph.addEdge(srcNode, Number(srcPort), dstNode, Number(dstPort))
+      state.graph.addEdge({}, srcNode, Number(srcPort), dstNode, Number(dstPort))
 
       this.render();
     },
@@ -76,11 +77,13 @@ function createMutationActions(domNode, state) {
 
 function initState(config) {
   return {
+    // from config
     graph: config.graph,
-    nodeConstructors: config.nodeConstructors,
-    getNodeName: config.getNodeName,
-    getInputNames: config.getInputNames,
-    getOutputNames: config.getOutputNames,
+    addNode: config.addNode,
+    drawNode: config.drawNode,
+    evaluate: config.evaluate,
+    nodes: config.nodes,
+    // otherwise
     graphUIData: {},
     selectedNodes: new Set(),
     tempEdge: ["", [0 ,0]],

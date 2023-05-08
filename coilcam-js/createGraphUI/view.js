@@ -2,55 +2,6 @@ import { render, html, svg } from 'lit-html';
 import { repeat } from 'lit-html/directives/repeat.js';
 import { map } from 'lit-html/directives/map.js';
 
-const drawNodeInput = (k, index, name) => html`
-  <div class="node-input">
-    <div
-      class=${[
-        "node-input-circle",
-        "socket"
-      ].join(" ")}
-      data-id=${`${k}:in:${index}`}></div>
-    <div class="node-input-name">${name}</div>
-  </div>
-`
-
-const drawNodeOutput = (k, index, name) => html`
-  <div class="node-output">
-    <div class="node-output-name">${name}</div>
-    <div
-      class="node-output-circle socket"
-      data-id=${`${k}:out:${index}`}></div>
-  </div>
-`
-
-// TODO This should take the relevant strings as args, so it's not tethered to a particular data
-// structure.
-const drawNode = (item, state) => { // TODO: make this a keyed-render
-  const [ k, node ] = item;
-  const nodeName = state.getNodeName(node);
-  const inputNames = state.getInputNames(node);
-  const outputNames = state.getOutputNames(node);
-
-  // console.log(state.selectedNodes);
-  const selected = state.selectedNodes.has(k);
-
-  if (!state.graphUIData[k]) return "";
-
-  return html`
-    <div
-      class=${["node", selected ? "selected-node" : ""].join(" ")}
-      data-id=${k}
-      style=${`left: ${state.graphUIData[k].x}px; top: ${state.graphUIData[k].y}px;`}>
-      <div class="node-title">
-        <div class="node-name">${nodeName}</div>
-      </div>
-      ${inputNames.map((x, i) => drawNodeInput(k, i, x))}
-      ${outputNames.map((x, i) => drawNodeOutput(k, i, x))}
-      <div class="node-view" id=${"ID"+k}></div>
-    </div>
-  `
-}
-
 
 function getRelative(el0, el1) {
   // Get the top, left coordinates of two elements
@@ -146,7 +97,7 @@ const drawSelectBox = box => {
 
 const dropdown = (state) => {
   const searchQuery = state.searchTerm.toLowerCase();
-  const filteredNodes = Object.keys(state.nodeConstructors).filter(
+  const filteredNodes = Object.keys(state.nodes).filter(
     (nodeType) => nodeType.toLowerCase().includes(searchQuery)
   );
 
@@ -174,7 +125,7 @@ export function view(state) {
   return html`
     <div class="root">
       <div class="menu">
-        <div class="menu-item"}>
+        <div class="menu-item" @click=${() => state.evaluate(...state.selectedNodes)}>
           <i class="fa-solid fa-play" style="padding-right: 10px;"></i>
           run
         </div>
@@ -213,7 +164,12 @@ export function view(state) {
 
         <div class="nodes">
           <div class="transform-group">
-            ${repeat(Object.entries(state.graph.getGraph().nodes), item => item[0], (item, index) => drawNode(item, state))}
+            ${repeat(
+                Object.entries(state.graph.getGraph().nodes), 
+                item => item[0], 
+                (item, index) => state.drawNode(item, state)
+              )
+            }
             ${drawSelectBox(state.selectBox)}
           </div>
         </div>
