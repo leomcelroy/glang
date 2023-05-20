@@ -134,11 +134,15 @@ export function createGraph() {
     const dst_node = getNode(edge.dst.node_id);
     dst_node.inputs[edge.dst.idx] = null;
     delete edges[edge_id];
-  }
+  }  
 
-  function getInputValues(node_id: string, data_key: string): any {
+
+  function getInputValues(
+    node_id: string, 
+    data_key: string
+  ): any {
     const node = getNode(node_id);
-    const values = node.inputs.map(edge_id => {
+    const values = node.inputs.map((edge_id, i) => {
       if (edge_id === null) return null;
 
       const edge = getEdge(edge_id);
@@ -146,6 +150,26 @@ export function createGraph() {
       const input_node = getNode(input_id);
 
       return input_node.data[data_key];
+    });
+
+    return values;
+  }
+
+  function iterateInputs(
+    node_id: string, 
+    fn
+  ): any {
+    const node = getNode(node_id);
+    const values = node.inputs.map((edge_id, i) => {
+      if (edge_id === null) return null;
+
+      const edge = getEdge(edge_id);
+      const input_id = edge.src.node_id;
+      const input_node = getNode(input_id);
+
+      // pass output index
+
+      return fn(input_node.data, edge.src.idx, i);
     });
 
     return values;
@@ -159,7 +183,8 @@ export function createGraph() {
     addEdge,
     removeNode,
     removeEdge,
-    getInputValues
+    getInputValues,
+    iterateInputs
   }
 }
 

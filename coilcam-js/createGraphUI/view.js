@@ -35,11 +35,12 @@ function drawEdge(edge, state) { // there muse be a better way to do this
   const rect0 = el0.getBoundingClientRect();
   const rect1 = el1.getBoundingClientRect();
 
-  const x0 = offset0[0]+rect0.width/2;
-  const y0 = offset0[1]+rect0.height/2;
-  const x1 = offset1[0]+rect1.width/2;
-  const y1 = offset1[1]+rect1.height/2;
+  const scale = window.devicePixelRatio;
 
+  const x0 = (offset0[0]+rect0.width/2)*scale;
+  const y0 = (offset0[1]+rect0.height/2)*scale;
+  const x1 = (offset1[0]+rect1.width/2)*scale;
+  const y1 = (offset1[1]+rect1.height/2)*scale;
 
   let xDist = Math.abs(x0 - x1);
   xDist = xDist/1.3;
@@ -54,7 +55,7 @@ function drawEdge(edge, state) { // there muse be a better way to do this
 function drawTempEdge(edge, state) {
   if (!state.domNode.querySelector(".socket")) return;
 
-  const [ from, [x1, y1] ] = edge;
+  let [ from, [x1, y1] ] = edge;
 
   if (from === "" || state.dataflow === null) return svg``;
 
@@ -62,8 +63,12 @@ function drawTempEdge(edge, state) {
   const el1 = state.domNode.querySelector(`.dataflow`);
   const offset0 = getRelative(el0, el1);
 
-  const x0 = offset0[0]+el0.getBoundingClientRect().width/2;
-  const y0 = offset0[1]+el0.getBoundingClientRect().height/2;
+  const scale = window.devicePixelRatio;
+
+  let x0 = (offset0[0]+el0.getBoundingClientRect().width/2)*scale;
+  let y0 = (offset0[1]+el0.getBoundingClientRect().height/2)*scale;
+  x1 = x1 * scale;
+  y1 = y1 * scale;
 
   let xDist = Math.abs(x0 - x1);
   xDist = xDist/1.3;

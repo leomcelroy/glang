@@ -3,6 +3,24 @@ import { createGraphUI } from "./createGraphUI/createGraphUI";
 import { createGraph } from "./createGraph";
 import { topologicalSort } from "./topologicalSort";
 
+const add = {
+  name: "add",
+  inputs: [
+    [ "x", "number" ],
+    [ "y", "number" ],
+  ],
+  outputs: [
+    [ "sum", "number" ]
+  ],
+  func: (x, y) => {
+
+    return [ x+y ]
+  },
+  post: (id, graph) => {
+
+  }
+}
+
 const toolpath = {
   name: "toolpath",
   inputs: [
@@ -185,6 +203,9 @@ const difference = {
 }
 
 const nodes = {
+  // input,
+  // slider,
+  add,
   // repeating toolpath
   toolpath,
   // function operators
@@ -255,20 +276,40 @@ const config = {
   drawNode,
 }
 
+function getInputs(index) {
+  config.graph
+}
+
 function evaluate(...nodeIds) {
   // topo sort and run
-  console.log(nodeIds);
+  // console.log(nodeIds);
 
   const graph = config.graph.getGraph();
+  const groups = topologicalSort(graph, nodeIds).flat();
 
-  topologicalSort(graph, nodeIds);
+  groups.forEach(nodeId => {
+    const node = config.graph.getNode(nodeId);
+    // console.log(node);
+    const inputs = config.graph.iterateInputs(nodeId, (data, outIndex) => {
+      return data.outputValues[outIndex];
+    });
+
+    const types = config.graph.iterateInputs(nodeId, (data, outIndex, inIndex) => {
+      return [ data.outputTypes[outIndex], node.data.inputTypes[inIndex]];
+    });
+
+    console.log(inputs, types);
+  })
+
 }
 
 function addNode(menuString) {
   const master = config.nodes[menuString];
   const data = {
     master,
-    outputValues: master.outputs.map(x => 0)
+    inputTypes: master.inputs.map(x => x[1]),
+    outputValues: master.outputs.map(x => 0),
+    outputTypes: master.outputs.map(x => x[1])
   };
 
   const id = config.graph.addNode(data, master.inputs.length, master.outputs.length);
@@ -278,8 +319,8 @@ function addNode(menuString) {
 
 
 const state = createGraphUI(document.body, config);
-const id = state.mutationActions.add_node("toolpath");
-const nodeXY = state.graphUIData[id];
-nodeXY.x = 100;
-nodeXY.y = 100;
+// const id = state.mutationActions.add_node("toolpath");
+// const nodeXY = state.graphUIData[id];
+// nodeXY.x = 100;
+// nodeXY.y = 100;
 
