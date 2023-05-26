@@ -142,6 +142,11 @@ function addNodeDragging(listen, state) {
 
     if (!pathContains(e, ".dataflow")) return;
 
+    if (pathContains(e, ".node-view")) {
+      state.dataflow.togglePanZoom(true);
+      return;
+    }
+
     nodeClicked = path.find(div => div.matches && div.matches(".node"));
 
     if (nodeClicked) {

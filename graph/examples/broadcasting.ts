@@ -1,4 +1,3 @@
-import { parse } from "path";
 import { createGraph } from "../graph_object";
 import { GLangNode } from "../types";
 
@@ -396,18 +395,16 @@ const test0 = {
     data: [
         0, 0, 
         10, 10, 
-        20, 20,
-        30, 30
     ],
-    shape: [4, 2]
+    shape: [2, 2]
 };
 
 
 const test1 = {
     data: [
-        0, 1, 2
+        0, 1
     ],
-    shape: [3]
+    shape: [2, 1]
 };
 
 
@@ -418,7 +415,7 @@ const resultBroadcast = broadcast(test0, test1, (x, y) => x + y);
 console.log(resultBroadcast.data, resultBroadcast.shape);
 
 
-const resultIterate = mutually_iterate(test0, test1, (x, y) => x + y);
-console.log(resultBroadcast);
+// const resultIterate = mutually_iterate(test0, test1, (x, y) => x + y);
+// console.log(resultBroadcast);
 
 export { makeBroadcastingGraph, BroadcastingOperation };

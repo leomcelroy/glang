@@ -140,7 +140,7 @@ html, body {
 
 .node {
   position: absolute;
-  width: 150px;
+  min-width: 150px;
   height: min-content;
   background: #add8e6e6;
   border-radius: 10px;
