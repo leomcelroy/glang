@@ -5,13 +5,15 @@ import { createGraph } from "../coilcam-js/createGraph";
 import { topologicalSort } from "../coilcam-js/topologicalSort";
 
 type BroadcastingOperation = "Input"
-  | "Reshape"
+  | "Reshape"     // reshapes an array without changing the number or order of elements
   // binary ops
-  | "Add"
-  | "Multiply"
+  | "Add"         // element-wise addition
+  | "Multiply"    // element-wise multiplication
   // unary ops
-  | "Reciprocal"
-  | "Transpose";
+  | "Reciprocal"  // inverts each element of an array
+  | "Transpose"   // transposes a matrix (must have 2 axes currently)
+  // reductions
+  | "Sum";        // sums over the last axis of the array
 
 
 type NDArray = {
@@ -141,7 +143,38 @@ const nodes = {
     post(nodeDOM, data) {
       nodeDOM.innerHTML = JSON.stringify(data.value);
     }
-  }
+  },
+  "Sum": {
+    name: "sum",
+    inputs: [ "matrix" ],
+    outputs: [ "matrix" ],
+    func(a) {
+      // The sum of the empty array is the empty array
+      if (a.shape.length === 1 && a.shape[0] === 0) {
+        return nullMatrix();
+      }
+
+      // Create the output array
+      const outShape = a.shape.slice(0, -1);
+      const outElements = outShape.reduce((a, b) => a * b, 1);
+      const outData = new Array(outElements);
+
+      for (let i = 0; i < outElements; i++) {
+        const idxArr = shapedIndex(i, outShape);
+        const idx = broadcastIndex([...idxArr, 0], a.shape);
+        let sum = 0;
+        for (let j = idx; j < idx + a.shape.at(-1); j++) {
+          sum += a.data[j];
+        }
+        outData[i] = sum;
+      }
+
+      return { data: outData, shape: outShape}
+    },
+    post(nodeDOM, data) {
+      nodeDOM.innerHTML = JSON.stringify(data.value);
+    }
+  },
 };
 
 const drawNodeInput = (k, index, name) => html`
@@ -319,6 +352,8 @@ function broadcast(
   return { data: outArr, shape: outShape };
 }
 
+// Takes a flat index (i.e. an integer) and a shape, and returns the corresponding shaped index
+// (i.e. index in each dimension). For example, shapedIndex(3, [2, 2]) is [1, 1].
 function shapedIndex(i, shape) {
     let index = [];
     let x = i;
@@ -331,6 +366,8 @@ function shapedIndex(i, shape) {
     return index;
 }
 
+// Takes a shaped index (i.e. index in each dimension) and a shape, and returns the corresponding
+// flat index (i.e. an integer). For example, broadcastIndex([1, 1], [2, 2]) is 3.
 function broadcastIndex(index, shape) {
 
   let inIndex = [];
