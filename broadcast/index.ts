@@ -7,7 +7,8 @@ import { topologicalSort } from "../coilcam-js/topologicalSort";
 type BroadcastingOperation = "Input"
   | "Reshape"
   | "Add"
-  | "Multiply";
+  | "Multiply"
+  | "Reciprocal";
 
 
 type NDArray = {
@@ -92,6 +93,17 @@ const nodes = {
     outputs: [ "matrix" ],
     func(a, b) {
       return broadcast(a, b, (x, y) => x * y);
+    },
+    post(nodeDOM, data) {
+      nodeDOM.innerHTML = JSON.stringify(data.value);
+    }
+  },
+  "Reciprocal": {
+    name: "reciprocal",
+    inputs: [ "matrix" ],
+    outputs: [ "matrix" ],
+    func(a) {
+      return map_over_array(a, (x) => 1 / x);
     },
     post(nodeDOM, data) {
       nodeDOM.innerHTML = JSON.stringify(data.value);
@@ -215,6 +227,22 @@ function parse_input_value(value: string): NDArray {
         data.shape = [];
         return data;
     }
+}
+
+function map_over_array(
+  { data: arr, shape: shape },
+  func
+) {
+  // Create the output array
+  const outArr = new Array(arr.length);
+  const outShape = shape.slice();
+
+  // Loop over the output array, applying the function to each element
+  for (let i = 0; i < arr.length; i++) {
+    outArr[i] = func(arr[i]);
+  }
+
+  return { data: outArr, outShape };
 }
 
 function broadcast(
