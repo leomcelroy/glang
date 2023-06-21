@@ -6,9 +6,12 @@ import { topologicalSort } from "../coilcam-js/topologicalSort";
 
 type BroadcastingOperation = "Input"
   | "Reshape"
+  // binary ops
   | "Add"
   | "Multiply"
-  | "Reciprocal";
+  // unary ops
+  | "Reciprocal"
+  | "Transpose";
 
 
 type NDArray = {
@@ -104,6 +107,36 @@ const nodes = {
     outputs: [ "matrix" ],
     func(a) {
       return map_over_array(a, (x) => 1 / x);
+    },
+    post(nodeDOM, data) {
+      nodeDOM.innerHTML = JSON.stringify(data.value);
+    }
+  },
+  "Transpose": {
+    name: "transpose",
+    inputs: [ "matrix" ],
+    outputs: [ "matrix" ],
+    func(a) {
+      if (a.shape.length !== 2) {
+        console.log("Transpose: matrix must have exactly two axes.");
+        return nullMatrix();
+      }
+
+      // Create the output array
+      const outData = new Array(a.data.length);
+      const outShape = a.shape.slice().reverse();
+
+      // Loop over the output array, applying the function to each element
+      const stride = a.shape[1];
+      for (let row = 0; row < a.shape[0]; row++) {
+        for (let col = 0; col < a.shape[1]; col++) {
+          const inIndex = row * a.shape[1] + col;
+          const outIndex = col * a.shape[0] + row;
+          outData[outIndex] = a.data[inIndex];
+        }
+      }
+
+      return { data: outData, outShape };
     },
     post(nodeDOM, data) {
       nodeDOM.innerHTML = JSON.stringify(data.value);
