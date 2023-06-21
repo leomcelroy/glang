@@ -35,7 +35,7 @@ function drawEdge(edge, state) { // there muse be a better way to do this
   const rect0 = el0.getBoundingClientRect();
   const rect1 = el1.getBoundingClientRect();
 
-  const scale = window.devicePixelRatio;
+  const scale = 1; // window.devicePixelRatio;
 
   const x0 = (offset0[0]+rect0.width/2)*scale;
   const y0 = (offset0[1]+rect0.height/2)*scale;
@@ -63,7 +63,7 @@ function drawTempEdge(edge, state) {
   const el1 = state.domNode.querySelector(`.dataflow`);
   const offset0 = getRelative(el0, el1);
 
-  const scale = window.devicePixelRatio;
+  const scale = 1; // window.devicePixelRatio;
 
   let x0 = (offset0[0]+el0.getBoundingClientRect().width/2)*scale;
   let y0 = (offset0[1]+el0.getBoundingClientRect().height/2)*scale;
