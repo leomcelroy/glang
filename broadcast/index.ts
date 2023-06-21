@@ -4,9 +4,9 @@ import { createGraphUI } from "../coilcam-js/createGraphUI/createGraphUI";
 import { createGraph } from "../coilcam-js/createGraph";
 import { topologicalSort } from "../coilcam-js/topologicalSort";
 
-type BroadcastingOperation = "Input" 
-  | "Reshape" 
-  | "Add" 
+type BroadcastingOperation = "Input"
+  | "Reshape"
+  | "Add"
   | "Multiply";
 
 
@@ -37,7 +37,7 @@ const nodes = {
         <textarea
           @blur=${setValue}
           @click=${e => { e.preventDefault(); }}>[0, 0, 0]</textarea>
-     
+
       `
 
       function setValue(e) {
@@ -53,11 +53,26 @@ const nodes = {
     name: "reshape",
     inputs: [ "matrix", "shape" ],
     outputs: [ "matrix" ],
-    func(a, b) {  
-      // return broadcast(a, b, (x, y) => x + y);
+    func(a, b) {
+      if (b.shape.length !== 1 || b.shape[0] == 0) {
+        console.log("Shapes must have exactly one axis.");
+        return nullMatrix();
+      }
+
+      const n_elements_matrix = a.shape.reduce((a, b) => a * b, 1);
+      const n_elements_shape = b.data.reduce((a, b) => a * b, 1);
+      if (n_elements_matrix !== n_elements_shape) {
+        console.log("Number of elements in matrix and shape must match.");
+        return nullMatrix();
+      }
+
+      // TODO Do we want a deep copy?
+      const data = a.data.slice();
+      const shape = b.data.slice();
+      return { data, shape };
     },
     post(nodeDOM, data) {
-      
+      nodeDOM.innerHTML = JSON.stringify(data.value);
     }
   },
   "Add": {
@@ -203,17 +218,17 @@ function parse_input_value(value: string): NDArray {
 }
 
 function broadcast(
-    { data: arr1, shape: shape1 }, 
-    { data: arr2, shape: shape2 }, 
+    { data: arr1, shape: shape1 },
+    { data: arr2, shape: shape2 },
     func
   ) {
   // Determine the shape of the output array
   const outShape = resultingShape(shape1, shape2);
   if (outShape === null) return nullMatrix();
-  
+
   // Create the output array
   const outArr = new Array(outShape.reduce((acc, val) => acc * val, 1));
-  
+
   // Loop over the output array, applying the function to the appropriate elements
   for (let i = 0; i < outArr.length; i++) {
     const coords = [];
@@ -239,7 +254,7 @@ function broadcast(
 
     outArr[i] = func(val1, val2);
   }
-  
+
   return { data: outArr, shape: outShape };
 }
 
