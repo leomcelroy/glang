@@ -58,7 +58,7 @@ const nodes = {
     inputs: [ "matrix", "shape" ],
     outputs: [ "matrix" ],
     func(a, b) {
-      if (b.shape.length !== 1 || b.shape[0] == 0) {
+      if (b.shape.length !== 1 || b.shape[0] === 0) {
         console.log("Shapes must have exactly one axis.");
         return nullMatrix();
       }
@@ -136,7 +136,7 @@ const nodes = {
         }
       }
 
-      return { data: outData, outShape };
+      return { data: outData, shape: outShape };
     },
     post(nodeDOM, data) {
       nodeDOM.innerHTML = JSON.stringify(data.value);
