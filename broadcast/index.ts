@@ -4,10 +4,16 @@ import { createGraphUI } from "../coilcam-js/createGraphUI/createGraphUI";
 import { createGraph } from "../coilcam-js/createGraph";
 import { topologicalSort } from "../coilcam-js/topologicalSort";
 
-type BroadcastingOperation = "Input" 
-  | "Reshape" 
-  | "Add" 
-  | "Multiply";
+type BroadcastingOperation = "Input"
+  | "Reshape"     // reshapes an array without changing the number or order of elements
+  // binary ops
+  | "Add"         // element-wise addition
+  | "Multiply"    // element-wise multiplication
+  // unary ops
+  | "Reciprocal"  // inverts each element of an array
+  | "Transpose"   // transposes a matrix (must have 2 axes currently)
+  // reductions
+  | "Sum";        // sums over the last axis of the array
 
 
 type NDArray = {
@@ -37,7 +43,7 @@ const nodes = {
         <textarea
           @blur=${setValue}
           @click=${e => { e.preventDefault(); }}>[0, 0, 0]</textarea>
-     
+
       `
 
       function setValue(e) {
@@ -53,11 +59,26 @@ const nodes = {
     name: "reshape",
     inputs: [ "matrix", "shape" ],
     outputs: [ "matrix" ],
-    func(a, b) {  
-      // return broadcast(a, b, (x, y) => x + y);
+    func(a, b) {
+      if (b.shape.length !== 1 || b.shape[0] === 0) {
+        console.log("Shapes must have exactly one axis.");
+        return nullMatrix();
+      }
+
+      const n_elements_matrix = a.shape.reduce((a, b) => a * b, 1);
+      const n_elements_shape = b.data.reduce((a, b) => a * b, 1);
+      if (n_elements_matrix !== n_elements_shape) {
+        console.log("Number of elements in matrix and shape must match.");
+        return nullMatrix();
+      }
+
+      // TODO Do we want a deep copy?
+      const data = a.data.slice();
+      const shape = b.data.slice();
+      return { data, shape };
     },
     post(nodeDOM, data) {
-      
+      nodeDOM.innerHTML = JSON.stringify(data.value);
     }
   },
   "Add": {
@@ -81,7 +102,79 @@ const nodes = {
     post(nodeDOM, data) {
       nodeDOM.innerHTML = JSON.stringify(data.value);
     }
-  }
+  },
+  "Reciprocal": {
+    name: "reciprocal",
+    inputs: [ "matrix" ],
+    outputs: [ "matrix" ],
+    func(a) {
+      return map_over_array(a, (x) => 1 / x);
+    },
+    post(nodeDOM, data) {
+      nodeDOM.innerHTML = JSON.stringify(data.value);
+    }
+  },
+  "Transpose": {
+    name: "transpose",
+    inputs: [ "matrix" ],
+    outputs: [ "matrix" ],
+    func(a) {
+      if (a.shape.length !== 2) {
+        console.log("Transpose: matrix must have exactly two axes.");
+        return nullMatrix();
+      }
+
+      // Create the output array
+      const outData = new Array(a.data.length);
+      const outShape = a.shape.slice().reverse();
+
+      // Loop over the output array, applying the function to each element
+      const stride = a.shape[1];
+      for (let row = 0; row < a.shape[0]; row++) {
+        for (let col = 0; col < a.shape[1]; col++) {
+          const inIndex = row * a.shape[1] + col;
+          const outIndex = col * a.shape[0] + row;
+          outData[outIndex] = a.data[inIndex];
+        }
+      }
+
+      return { data: outData, shape: outShape };
+    },
+    post(nodeDOM, data) {
+      nodeDOM.innerHTML = JSON.stringify(data.value);
+    }
+  },
+  "Sum": {
+    name: "sum",
+    inputs: [ "matrix" ],
+    outputs: [ "matrix" ],
+    func(a) {
+      // The sum of the empty array is the empty array
+      if (a.shape.length === 1 && a.shape[0] === 0) {
+        return nullMatrix();
+      }
+
+      // Create the output array
+      const outShape = a.shape.slice(0, -1);
+      const outElements = outShape.reduce((a, b) => a * b, 1);
+      const outData = new Array(outElements);
+
+      for (let i = 0; i < outElements; i++) {
+        const idxArr = shapedIndex(i, outShape);
+        const idx = broadcastIndex([...idxArr, 0], a.shape);
+        let sum = 0;
+        for (let j = idx; j < idx + a.shape.at(-1); j++) {
+          sum += a.data[j];
+        }
+        outData[i] = sum;
+      }
+
+      return { data: outData, shape: outShape}
+    },
+    post(nodeDOM, data) {
+      nodeDOM.innerHTML = JSON.stringify(data.value);
+    }
+  },
 };
 
 const drawNodeInput = (k, index, name) => html`
@@ -202,18 +295,34 @@ function parse_input_value(value: string): NDArray {
     }
 }
 
+function map_over_array(
+  { data: arr, shape: shape },
+  func
+) {
+  // Create the output array
+  const outArr = new Array(arr.length);
+  const outShape = shape.slice();
+
+  // Loop over the output array, applying the function to each element
+  for (let i = 0; i < arr.length; i++) {
+    outArr[i] = func(arr[i]);
+  }
+
+  return { data: outArr, outShape };
+}
+
 function broadcast(
-    { data: arr1, shape: shape1 }, 
-    { data: arr2, shape: shape2 }, 
+    { data: arr1, shape: shape1 },
+    { data: arr2, shape: shape2 },
     func
   ) {
   // Determine the shape of the output array
   const outShape = resultingShape(shape1, shape2);
   if (outShape === null) return nullMatrix();
-  
+
   // Create the output array
   const outArr = new Array(outShape.reduce((acc, val) => acc * val, 1));
-  
+
   // Loop over the output array, applying the function to the appropriate elements
   for (let i = 0; i < outArr.length; i++) {
     const coords = [];
@@ -239,10 +348,12 @@ function broadcast(
 
     outArr[i] = func(val1, val2);
   }
-  
+
   return { data: outArr, shape: outShape };
 }
 
+// Takes a flat index (i.e. an integer) and a shape, and returns the corresponding shaped index
+// (i.e. index in each dimension). For example, shapedIndex(3, [2, 2]) is [1, 1].
 function shapedIndex(i, shape) {
     let index = [];
     let x = i;
@@ -255,6 +366,8 @@ function shapedIndex(i, shape) {
     return index;
 }
 
+// Takes a shaped index (i.e. index in each dimension) and a shape, and returns the corresponding
+// flat index (i.e. an integer). For example, broadcastIndex([1, 1], [2, 2]) is 3.
 function broadcastIndex(index, shape) {
 
   let inIndex = [];
