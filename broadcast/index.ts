@@ -333,4 +333,9 @@ const s1 = arrayToData([ 2, 1 ]);
 
 const result = broadcast(s0, s1, (x, y) => x + y);
 
+console.log(
+  shapedIndex(1, [1, 2]),
+  shapedIndex(1, [2, 1])
+)
+
 console.log({ s0, s1, result });
